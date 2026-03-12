@@ -1,0 +1,42 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtual environment
+venv/
+.venv/
+env/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Données brutes volumineuses (>50Mo)
+# Les CSV sont telecharges via le notebook 01_acquisition
+data/raw/bios.csv
+data/raw/bios_locs.csv
+data/raw/results.csv
+
+# Données processees (regenerees par les notebooks)
+data/processed/
+
+# Modeles serialises (regeneres par notebook 05)
+models/*.pkl
+
+# Cache
+.pytest_cache/
+.streamlit/
+
+# Env
+.env
