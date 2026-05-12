@@ -6,19 +6,33 @@
 **Date de creation :** 2026-03-12
 **Derniere mise a jour :** 2026-05-12 -- alignement sur brief officiel
 
+<!-- MODIF (PR #18) : ajout d'une section "Conformite au brief" en tete de
+     document. Raison : le PLAN initial avait ete redige librement sans
+     verifier ligne a ligne le brief officiel UF_IADATA_B3.pdf (sujet 3).
+     Apres relecture, 4 elements explicites du brief manquaient au plan :
+     granularite athlete, systeme de cotes, timeline des records, avis users.
+     Cette section les reintroduit pour eviter une mauvaise note au jury. -->
+
 ---
 
 ## Conformite au brief officiel (Sujet 3 -- YPerf)
 
+<!-- Source : enonce officiel page 8 du PDF UF_IADATA_B3.pdf -->
 Le brief decrit YPerf, start-up fictive qui veut construire une app de data storytelling pour explorer les performances passees des athletes **par pays, sport et genre**, et predire **les nations ou athletes a suivre en 2028**.
 
 ### Objectifs imposes par le brief
+<!-- Reproduction litterale des 4 objectifs du brief (page 8).
+     Les mots en gras signalent les exigences specifiques sous-jacentes
+     que la version initiale du plan ne traitait pas explicitement. -->
 1. Analyser les resultats des JO precedents par sport, pays et **genre**
 2. Visualiser l'evolution des performances par **discipline**
 3. Identifier les **athletes ET pays** en progression par discipline
 4. Creer des projectifs sur les JO 2028 bases sur les tendances observees
 
 ### Taches imposees par le brief
+<!-- Tableau de reconciliation entre les 5 taches du brief et nos 10 phases.
+     Permet au jury de verifier en un coup d'oeil que rien n'est oublie.
+     Statut au 2026-05-12 : 4 phases sur 10 mergees (PRs #11, #12, #15, #16). -->
 | Tache brief | Phase | Statut |
 |---|---|---|
 | 1. Acquisition + preparation (resultats, medailles, records, athletes) | 2-3 | Fait |
@@ -28,6 +42,10 @@ Le brief decrit YPerf, start-up fictive qui veut construire une app de data stor
 | 5. Deploiement local + documentation | 8-9 | A faire |
 
 ### Elements specifiques du brief integres dans ce plan
+<!-- Liste des 4 elements explicitement nommes dans le brief qui etaient
+     absents ou sous-specifies dans la version initiale du PLAN.
+     Phase 5 enrichie pour traiter granularite athlete + timeline records.
+     Phases 6-7 a enrichir plus tard pour le systeme de cotes (autre PR). -->
 - **Granularite athlete** : pas seulement par pays, aussi par athlete individuel (top performers, generations montantes) -- phase 5 + 7
 - **Systeme de cote** : scoring probabiliste pour athletes et pour couples pays x discipline -- phase 6-7
 - **Timeline des records** : visualisation chronologique des records olympiques -- phase 5 ou 8
@@ -135,6 +153,14 @@ Note finale = competence * ponderation
 - [ ] Commit + push
 - **Validation :** tests statistiques avec p-values, interpretations
 
+<!-- MODIF (PR #18) : enrichissement de la Phase 5 pour couvrir les exigences
+     manquantes du brief officiel :
+     - Chapitre 1 augmente avec "timeline interactive Plotly des records"
+       (tache 4 du brief : "Timeline des records")
+     - Chapitres 5 et 6 ajoutes pour traiter la granularite athlete
+       (objectif 3 du brief : "Identifier les athletes ET pays en progression")
+     - Bullet "Analyse genre" ajoute pour couvrir l'objectif 1
+       (analyse par "sport, pays et genre") -->
 ### PHASE 5 -- Analyse exploratoire + storytelling
 - [ ] Notebook 04_exploration.ipynb
 - [ ] Narration Markdown riche entre les cellules
