@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prédictions LA 2028 — YPerf</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;700;800;900&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <link rel="stylesheet" href="assets/css/app.css">
+  <link rel="icon" type="image/svg+xml" href="assets/img/olympic-rings.svg">
+</head>
+
+<body>
+
+<nav class="app-nav">
+  <div class="max-w-7xl mx-auto flex items-center justify-between">
+    <a href="index.html" class="brand">
+      <img src="assets/img/olympic-rings.svg" alt="" class="rings-tiny" style="filter:brightness(0) invert(1);">
+      <span>YPerf</span>
+    </a>
+    <div class="hidden md:flex items-center gap-8 text-sm">
+      <a href="index.html">Accueil</a>
+      <a href="predict.html" class="text-white">Prédictions LA 2028</a>
+      <a href="methodology.html">Méthodologie</a>
+    </div>
+  </div>
+</nav>
+
+
+<!-- HERO PREDICT -->
+<section class="hero" style="min-height: 60vh;">
+  <div class="hero-bg" style="background-image: linear-gradient(180deg, rgba(10,14,26,0.55) 0%, rgba(10,14,26,0.96) 100%), url('assets/img/LA.jpg');"></div>
+  <div class="hero-content">
+    <img src="assets/img/olympic-rings.svg" alt="" class="rings-medium mx-auto mb-6" style="filter:brightness(0) invert(1);">
+    <div class="chip">Modèle de prédiction</div>
+    <h1 class="font-serif font-black leading-none" style="font-size: clamp(2.5rem, 8vw, 6rem);">
+      <span class="block">Los Angeles</span>
+      <span class="block text-rainbow">2028</span>
+    </h1>
+    <p class="font-serif italic text-lg md:text-xl mt-6 max-w-2xl mx-auto opacity-90">
+      Classement prédit et cote par discipline pour les prochains Jeux d'été.
+    </p>
+  </div>
+</section>
+
+
+<section class="section">
+
+  <!-- METRIQUES DU MODELE -->
+  <div class="text-center mb-8">
+    <div class="eyebrow">Performance du modèle</div>
+    <h2 class="font-serif font-black text-4xl md:text-5xl mb-4">Validé sur Paris 2024</h2>
+    <p class="text-lg text-slate-600 max-w-2xl mx-auto">
+      Le modèle n'a jamais vu Paris 2024 à l'entraînement. Voici comment il s'en sort
+      sur cette baseline avant la projection LA 2028.
+    </p>
+  </div>
+
+  <div class="kpi-grid mb-12" id="metrics-grid"></div>
+
+
+  <!-- CLASSEMENT LA 2028 -->
+  <div class="text-center mt-20 mb-8">
+    <div class="eyebrow">La prédiction</div>
+    <h2 class="font-serif font-black text-4xl md:text-5xl mb-4">Classement LA 2028</h2>
+    <p class="text-lg text-slate-600 max-w-2xl mx-auto">
+      Tableau officiel CIO : tri par Or, puis Argent, puis Bronze.
+      Les USA, pays hôte, sont massivement favorisés.
+    </p>
+  </div>
+
+  <div class="plot-container">
+    <div id="plot-top10" style="height: 550px;"></div>
+  </div>
+
+  <div class="overflow-x-auto mt-6">
+    <table class="medal-table" id="ranking-table">
+      <thead>
+        <tr>
+          <th>Rang</th>
+          <th>Pays</th>
+          <th class="text-right" style="color: #D4AF37;">Or</th>
+          <th class="text-right" style="color: #94a3b8;">Argent</th>
+          <th class="text-right" style="color: #cd7f32;">Bronze</th>
+          <th class="text-right">Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Filled by JS -->
+      </tbody>
+    </table>
+  </div>
+
+
+  <!-- COTE PAR DISCIPLINE -->
+  <div class="text-center mt-24 mb-8">
+    <div class="eyebrow">Détail par sport</div>
+    <h2 class="font-serif font-black text-4xl md:text-5xl mb-4">Cote par discipline</h2>
+    <p class="text-lg text-slate-600 max-w-2xl mx-auto">
+      Sélectionnez un pays pour découvrir ses 15 disciplines les plus prometteuses pour LA 2028,
+      comparées à ses résultats de Paris 2024.
+    </p>
+  </div>
+
+  <div class="bg-white p-4 rounded-2xl border border-slate-200 mb-4 flex items-center gap-4 flex-wrap">
+    <label for="country-select" class="text-sm font-semibold text-slate-700">Pays :</label>
+    <select id="country-select" class="country-select" style="min-width: 220px;">
+      <option value="">Chargement...</option>
+    </select>
+    <span class="text-xs text-slate-500 ml-auto" id="country-total">—</span>
+  </div>
+
+  <div class="plot-container">
+    <div id="plot-per-sport" style="height: 600px;"></div>
+  </div>
+
+  <div class="bg-blue-50 border-l-4 border-blue-500 p-5 rounded-r-xl text-sm text-slate-700 mt-8">
+    <strong>Note de lecture :</strong> les barres claires montrent les médailles réelles de
+    <strong>Paris 2024</strong> (référence). Les barres pleines colorées sont la <strong>prédiction LA 2028</strong>.
+    Le modèle utilise les 3 dernières olympiades comme historique.
+  </div>
+
+</section>
+
+
+<footer class="footer">
+  <img src="assets/img/olympic-rings.svg" alt="" class="rings-tiny mx-auto mb-3" style="filter:brightness(0) invert(1); opacity:0.7;">
+  <div class="font-serif font-bold text-2xl text-white mb-2">YPerf</div>
+  <p>Projet Bachelor 3 YNOV — UF SPÉ Data & IA — 2026</p>
+</footer>
+
+
+<script>
+const COLORS = {
+  blue: '#0085C7', yellow: '#F4C300', black: '#000000',
+  green: '#009F3D', red: '#DF0024',
+  gold: '#D4AF37', silver: '#94a3b8', bronze: '#cd7f32',
+};
+
+const PLOTLY_LAYOUT = {
+  paper_bgcolor: 'rgba(0,0,0,0)',
+  plot_bgcolor: 'rgba(0,0,0,0)',
+  font: { family: 'Inter', size: 13, color: '#0a0e1a' },
+  title: {
+    font: { family: '"Playfair Display", serif', size: 20, color: '#0a0e1a' },
+    x: 0.02, xanchor: 'left', pad: { t: 15, b: 15 },
+  },
+  margin: { l: 60, r: 30, t: 60, b: 50 },
+  xaxis: {
+    showgrid: true, gridcolor: 'rgba(0,0,0,0.06)',
+    tickfont: { size: 12, color: '#64748b' },
+    title: { font: { size: 13, color: '#64748b' } },
+  },
+  yaxis: {
+    showgrid: true, gridcolor: 'rgba(0,0,0,0.06)',
+    tickfont: { size: 12, color: '#64748b' },
+    title: { font: { size: 13, color: '#64748b' } },
+  },
+  legend: {
+    orientation: 'h', yanchor: 'bottom', y: 1.02, xanchor: 'right', x: 1,
+    bgcolor: 'rgba(255,255,255,0.7)', font: { size: 12 },
+  },
+  hoverlabel: { bgcolor: '#0a0e1a', font: { color: 'white', family: 'Inter' } },
+  barmode: 'stack',
+};
+
+const PLOTLY_CONFIG = {
+  responsive: true, displaylogo: false,
+  modeBarButtonsToRemove: ['lasso2d', 'select2d', 'autoScale2d'],
+};
+
+
+// === METRIQUES ===
+fetch('data/model_metrics.json').then(r => r.json()).then(m => {
+  document.getElementById('metrics-grid').innerHTML = `
+    <div class="kpi-card">
+      <div class="kpi-value">${m.country_level.r2.toFixed(2)}</div>
+      <div class="kpi-label">R² au niveau pays<br>(Paris 2024)</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-value">${m.country_level.rmse.toFixed(1)}</div>
+      <div class="kpi-label">RMSE moyen<br>médailles d'écart</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-value">${m.n_top_sports}</div>
+      <div class="kpi-label">Sports modélisés<br>top historique</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-value">3</div>
+      <div class="kpi-label">Modèles<br>Or / Argent / Bronze</div>
+    </div>
+  `;
+});
+
+
+// === CLASSEMENT LA 2028 ===
+fetch('data/projection_2028.json').then(r => r.json()).then(data => {
+  const top20 = data.slice(0, 20);
+
+  // Graph top 10 stacked bar
+  const top10 = data.slice(0, 10).reverse();
+  Plotly.newPlot('plot-top10', [
+    {
+      x: top10.map(d => d.Gold_2028),
+      y: top10.map(d => d.Country),
+      type: 'bar',
+      orientation: 'h',
+      name: 'Or',
+      marker: { color: COLORS.gold },
+      hovertemplate: '<b>%{y}</b><br>Or : %{x:.1f}<extra></extra>',
+    },
+    {
+      x: top10.map(d => d.Silver_2028),
+      y: top10.map(d => d.Country),
+      type: 'bar',
+      orientation: 'h',
+      name: 'Argent',
+      marker: { color: COLORS.silver },
+      hovertemplate: '<b>%{y}</b><br>Argent : %{x:.1f}<extra></extra>',
+    },
+    {
+      x: top10.map(d => d.Bronze_2028),
+      y: top10.map(d => d.Country),
+      type: 'bar',
+      orientation: 'h',
+      name: 'Bronze',
+      marker: { color: COLORS.bronze },
+      hovertemplate: '<b>%{y}</b><br>Bronze : %{x:.1f}<extra></extra>',
+    },
+  ], {
+    ...PLOTLY_LAYOUT,
+    title: { ...PLOTLY_LAYOUT.title, text: 'Top 10 prédit — LA 2028' },
+    xaxis: { ...PLOTLY_LAYOUT.xaxis, title: 'Médailles prédites' },
+    yaxis: { ...PLOTLY_LAYOUT.yaxis, title: '', automargin: true },
+    margin: { l: 130, r: 30, t: 60, b: 50 },
+  }, PLOTLY_CONFIG);
+
+  // Table top 20
+  const tbody = document.querySelector('#ranking-table tbody');
+  tbody.innerHTML = top20.map(d => {
+    const rankClass = d.Rank === 1 ? 'rank-1' : d.Rank === 2 ? 'rank-2' : d.Rank === 3 ? 'rank-3' : '';
+    return `
+      <tr>
+        <td><span class="rank ${rankClass}">${d.Rank}</span></td>
+        <td><span class="country-flag">${d.NOC}</span>${d.Country}</td>
+        <td class="text-right font-mono" style="color: ${COLORS.gold}; font-weight: 600;">${d.Gold_2028.toFixed(1)}</td>
+        <td class="text-right font-mono" style="color: ${COLORS.silver};">${d.Silver_2028.toFixed(1)}</td>
+        <td class="text-right font-mono" style="color: ${COLORS.bronze};">${d.Bronze_2028.toFixed(1)}</td>
+        <td class="text-right font-mono font-semibold">${d.Total_2028.toFixed(1)}</td>
+      </tr>
+    `;
+  }).join('');
+});
+
+
+// === COTE PAR DISCIPLINE ===
+fetch('data/per_sport_predictions.json').then(r => r.json()).then(data => {
+  const select = document.getElementById('country-select');
+  const totalEl = document.getElementById('country-total');
+
+  select.innerHTML = '<option value="">— Sélectionner un pays —</option>' +
+    data.map(d => `<option value="${d.NOC}">${d.Country}</option>`).join('');
+
+  function renderSportsFor(noc) {
+    const country = data.find(d => d.NOC === noc);
+    if (!country) {
+      document.getElementById('plot-per-sport').innerHTML =
+        '<div class="text-center text-slate-400 py-32">Sélectionnez un pays pour voir sa cote par discipline.</div>';
+      totalEl.textContent = '—';
+      return;
+    }
+
+    const sports = country.sports.filter(s => s.pred_Total > 0 || s.real_Total > 0);
+    const sorted = [...sports].sort((a, b) => a.pred_Total - b.pred_Total);
+    const totalPred = sports.reduce((sum, s) => sum + s.pred_Total, 0);
+    totalEl.textContent = `Total prédit LA 2028 : ${totalPred.toFixed(0)} médailles`;
+
+    Plotly.newPlot('plot-per-sport', [
+      // 2024 réel (transparent)
+      {
+        x: sorted.map(s => s.real_Total),
+        y: sorted.map(s => s.Sport),
+        type: 'bar',
+        orientation: 'h',
+        name: 'Paris 2024 (réel)',
+        marker: { color: 'rgba(100, 116, 139, 0.4)' },
+        hovertemplate: '<b>%{y}</b><br>Paris 2024 : %{x}<extra></extra>',
+        offsetgroup: 0,
+      },
+      // 2028 Or
+      {
+        x: sorted.map(s => s.pred_Gold),
+        y: sorted.map(s => s.Sport),
+        type: 'bar',
+        orientation: 'h',
+        name: '2028 Or',
+        marker: { color: COLORS.gold },
+        hovertemplate: '<b>%{y}</b><br>Or 2028 : %{x:.1f}<extra></extra>',
+        offsetgroup: 1,
+      },
+      {
+        x: sorted.map(s => s.pred_Silver),
+        y: sorted.map(s => s.Sport),
+        type: 'bar',
+        orientation: 'h',
+        name: '2028 Argent',
+        marker: { color: COLORS.silver },
+        hovertemplate: '<b>%{y}</b><br>Argent 2028 : %{x:.1f}<extra></extra>',
+        offsetgroup: 1,
+      },
+      {
+        x: sorted.map(s => s.pred_Bronze),
+        y: sorted.map(s => s.Sport),
+        type: 'bar',
+        orientation: 'h',
+        name: '2028 Bronze',
+        marker: { color: COLORS.bronze },
+        hovertemplate: '<b>%{y}</b><br>Bronze 2028 : %{x:.1f}<extra></extra>',
+        offsetgroup: 1,
+      },
+    ], {
+      ...PLOTLY_LAYOUT,
+      title: { ...PLOTLY_LAYOUT.title, text: `${country.Country} — 15 disciplines clés` },
+      barmode: 'stack',
+      xaxis: { ...PLOTLY_LAYOUT.xaxis, title: 'Médailles' },
+      yaxis: { ...PLOTLY_LAYOUT.yaxis, title: '', automargin: true },
+      margin: { l: 180, r: 30, t: 60, b: 50 },
+    }, PLOTLY_CONFIG);
+  }
+
+  select.value = 'USA';
+  renderSportsFor('USA');
+  select.addEventListener('change', e => renderSportsFor(e.target.value));
+});
+</script>
+
+</body>
+</html>

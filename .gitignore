@@ -2,9 +2,12 @@
 __pycache__/
 *.py[cod]
 *.egg-info/
-dist/
 build/
 .eggs/
+
+# Python build dist/ (mais on garde app/dist/ qui est notre site final)
+/dist/
+!app/dist/
 
 # Virtual environment
 venv/
