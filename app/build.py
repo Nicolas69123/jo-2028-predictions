@@ -61,23 +61,77 @@ save("historical_top5", historical)
 # === Projection LA 2028 (classement complet) ===
 save("projection_2028", projection_country.to_dict(orient="records"))
 
-# === Projection par sport (pivot par pays pour le selecteur) ===
+# === Projection par sport AVEC HISTORIQUE multi-annees ===
+# Pour chaque pays du top 20, on exporte les medailles par sport pour plusieurs annees
+# (passees + prediction 2028). Permet la comparaison multi-annee dans l'interface.
+
+# Annees a inclure : toutes les editions d'ete depuis 2000 + 2028 predit
+YEARS_TO_EXPORT = [2000, 2004, 2008, 2012, 2016, 2020, 2024]
 top20_nocs = projection_country.head(20)["NOC"].tolist()
+
+# Top 30 sports les plus medailles (pour eviter d'avoir trop de "0" inutiles)
+top_sports_export = (df.groupby("Sport")["Total"].sum()
+                     .sort_values(ascending=False).head(30).index.tolist())
+
 per_sport_data = []
 for noc in top20_nocs:
-    country_data = projection_sport[projection_sport["NOC"] == noc].copy()
-    country_data = country_data.sort_values("pred_Total", ascending=False).head(15)
-    # Recuperer les medailles reelles 2024 pour comparaison
-    real_2024 = df[(df["Year"] == 2024) & (df["NOC"] == noc)][["Sport", "Gold", "Silver", "Bronze", "Total"]]
-    real_2024 = real_2024.rename(columns={"Gold":"real_Gold","Silver":"real_Silver","Bronze":"real_Bronze","Total":"real_Total"})
-    country_data = country_data.merge(real_2024, on="Sport", how="left").fillna(0)
     country_name = projection_country[projection_country["NOC"] == noc]["Country"].iloc[0]
+
+    # Sports a afficher pour ce pays : top 15 selon la prediction 2028
+    proj_country = projection_sport[projection_sport["NOC"] == noc].copy()
+    top_sports_country = (proj_country.sort_values("pred_Total", ascending=False)
+                          .head(15)["Sport"].tolist())
+
+    # Construire les donnees par annee x sport
+    by_year = {}
+    for year in YEARS_TO_EXPORT:
+        year_data = df[(df["Year"] == year) & (df["NOC"] == noc)
+                       & (df["Sport"].isin(top_sports_country))].copy()
+        sport_records = []
+        for sport in top_sports_country:
+            row = year_data[year_data["Sport"] == sport]
+            if len(row) > 0:
+                r = row.iloc[0]
+                sport_records.append({
+                    "Sport": sport,
+                    "Gold": int(r["Gold"]),
+                    "Silver": int(r["Silver"]),
+                    "Bronze": int(r["Bronze"]),
+                    "Total": int(r["Total"]),
+                })
+            else:
+                sport_records.append({
+                    "Sport": sport, "Gold": 0, "Silver": 0, "Bronze": 0, "Total": 0,
+                })
+        by_year[str(year)] = sport_records
+
+    # Ajouter la prediction 2028 (depuis projection_2028_per_sport.csv)
+    pred_records = []
+    for sport in top_sports_country:
+        row = proj_country[proj_country["Sport"] == sport]
+        if len(row) > 0:
+            r = row.iloc[0]
+            pred_records.append({
+                "Sport": sport,
+                "Gold": float(r["pred_Gold"]),
+                "Silver": float(r["pred_Silver"]),
+                "Bronze": float(r["pred_Bronze"]),
+                "Total": float(r["pred_Total"]),
+            })
+        else:
+            pred_records.append({
+                "Sport": sport, "Gold": 0, "Silver": 0, "Bronze": 0, "Total": 0,
+            })
+    by_year["2028"] = pred_records  # 2028 = prediction
+
     per_sport_data.append({
         "NOC": noc,
         "Country": str(country_name),
-        "sports": country_data[["Sport", "pred_Gold", "pred_Silver", "pred_Bronze", "pred_Total",
-                                  "real_Gold", "real_Silver", "real_Bronze", "real_Total"]].to_dict(orient="records"),
+        "sports_list": top_sports_country,
+        "available_years": YEARS_TO_EXPORT + [2028],
+        "by_year": by_year,
     })
+
 save("per_sport_predictions", per_sport_data)
 
 # === Metriques du modele ===
