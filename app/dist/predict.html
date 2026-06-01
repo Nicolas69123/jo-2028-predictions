@@ -125,11 +125,19 @@
       <span class="text-xs text-slate-500 ml-auto" id="country-total">—</span>
     </div>
 
-    <!-- Pays (mode compare : multi-pays) -->
+    <!-- Pays (mode compare : multi-pays via dropdown + tags) -->
     <div class="flex items-start gap-4 flex-wrap hidden" id="compare-country-row">
-      <label class="text-sm font-semibold text-slate-700 w-24 pt-2">Pays :</label>
-      <div id="country-chips" class="flex-1 flex flex-wrap gap-2">
-        <!-- Filled by JS -->
+      <label for="add-country-select" class="text-sm font-semibold text-slate-700 w-24 pt-2">Pays :</label>
+      <div class="flex-1">
+        <div class="flex items-center gap-3 flex-wrap mb-2">
+          <select id="add-country-select" class="country-select" style="min-width: 220px;">
+            <option value="">+ Ajouter un pays…</option>
+          </select>
+          <span class="text-xs text-slate-400" id="compare-hint">jusqu'à 6 pays</span>
+        </div>
+        <div id="country-tags" class="flex flex-wrap gap-2">
+          <!-- Tags pays selectionnes (filled by JS) -->
+        </div>
       </div>
     </div>
 
@@ -156,17 +164,31 @@
   </div>
 
   <style>
-    .year-chip, .country-chip {
+    .year-chip {
       padding: 0.5rem 1rem; border-radius: 100px;
       border: 1px solid rgba(0,0,0,0.12); background: white;
       font-size: 0.85rem; font-weight: 500; cursor: pointer;
       transition: all 0.2s; font-family: inherit;
     }
-    .year-chip:hover, .country-chip:hover { border-color: var(--olympic-blue); }
-    .year-chip.active, .country-chip.active {
+    .year-chip:hover { border-color: var(--olympic-blue); }
+    .year-chip.active {
       background: var(--olympic-blue); color: white;
       border-color: var(--olympic-blue);
     }
+    .country-tag {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.4rem 0.5rem 0.4rem 0.9rem; border-radius: 100px;
+      background: var(--olympic-blue); color: white;
+      font-size: 0.85rem; font-weight: 500; font-family: inherit;
+    }
+    .country-tag button {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 18px; height: 18px; border-radius: 50%;
+      background: rgba(255,255,255,0.25); color: white; border: none;
+      cursor: pointer; font-size: 0.75rem; line-height: 1; padding: 0;
+      transition: background 0.15s;
+    }
+    .country-tag button:hover { background: rgba(255,255,255,0.5); }
     .year-chip.pred {
       border-style: dashed; border-color: var(--olympic-red);
       color: var(--olympic-red);
@@ -351,11 +373,16 @@ fetch('data/per_sport_predictions.json').then(r => r.json()).then(data => {
   const yearControlsEl = document.getElementById('year-controls');
   const yearLabelEl = document.getElementById('year-label');
   const modeToggleEl = document.getElementById('mode-toggle');
-  const countryChipsEl = document.getElementById('country-chips');
+  const addCountrySelect = document.getElementById('add-country-select');
+  const countryTagsEl = document.getElementById('country-tags');
   const singleRow = document.getElementById('single-country-row');
   const compareRow = document.getElementById('compare-country-row');
 
-  const ALL_YEARS = [2000, 2004, 2008, 2012, 2016, 2020, 2024, 2028];
+  // Annees disponibles, lues depuis les donnees (1952->2028)
+  const ALL_YEARS = (data[0] ? data[0].available_years : []).map(Number);
+
+  // Pays tries par ordre alphabetique pour les selecteurs/chips
+  const dataSorted = [...data].sort((a, b) => a.Country.localeCompare(b.Country, 'fr'));
 
   // State global
   const state = {
@@ -365,33 +392,44 @@ fetch('data/per_sport_predictions.json').then(r => r.json()).then(data => {
     compareNocs: ['USA', 'CHN', 'FRA'],  // pays compares (mode compare)
   };
 
-  // Populate dropdown pays (mode single)
+  // Populate dropdown pays (mode single) -- ordre alphabetique
   select.innerHTML = '<option value="">— Sélectionner un pays —</option>' +
-    data.map(d => `<option value="${d.NOC}">${d.Country}</option>`).join('');
+    dataSorted.map(d => `<option value="${d.NOC}">${d.Country}</option>`).join('');
 
-  // === Render chips pays (mode compare) ===
-  function renderCountryChips() {
-    countryChipsEl.innerHTML = data.map(d => {
-      const active = state.compareNocs.includes(d.NOC);
-      return `<button class="country-chip ${active ? 'active' : ''}" data-noc="${d.NOC}">${d.Country}</button>`;
-    }).join('');
+  const nameOf = noc => (data.find(d => d.NOC === noc) || {}).Country || noc;
 
-    countryChipsEl.querySelectorAll('.country-chip').forEach(btn => {
+  // === Mode compare : dropdown "ajouter" + tags des pays selectionnes ===
+  function renderCompareControls() {
+    // Dropdown : seulement les pays PAS encore selectionnes, ordre alpha
+    const available = dataSorted.filter(d => !state.compareNocs.includes(d.NOC));
+    const atMax = state.compareNocs.length >= 6;
+    addCountrySelect.innerHTML =
+      `<option value="">${atMax ? 'Maximum 6 pays atteint' : '+ Ajouter un pays…'}</option>` +
+      available.map(d => `<option value="${d.NOC}">${d.Country}</option>`).join('');
+    addCountrySelect.disabled = atMax;
+
+    // Tags des pays choisis (dans l'ordre de selection), avec bouton supprimer
+    countryTagsEl.innerHTML = state.compareNocs.map(noc =>
+      `<span class="country-tag">${nameOf(noc)}<button data-noc="${noc}" title="Retirer" aria-label="Retirer ${nameOf(noc)}">✕</button></span>`
+    ).join('');
+
+    countryTagsEl.querySelectorAll('button').forEach(btn => {
       btn.addEventListener('click', () => {
-        const noc = btn.dataset.noc;
-        const idx = state.compareNocs.indexOf(noc);
-        if (idx === -1) {
-          if (state.compareNocs.length >= 6) { alert('Maximum 6 pays en comparaison'); return; }
-          state.compareNocs.push(noc);
-        } else {
-          if (state.compareNocs.length === 1) { alert('Au moins un pays doit être sélectionné'); return; }
-          state.compareNocs.splice(idx, 1);
-        }
-        renderCountryChips();
+        if (state.compareNocs.length === 1) { alert('Au moins un pays doit être sélectionné'); return; }
+        state.compareNocs = state.compareNocs.filter(n => n !== btn.dataset.noc);
+        renderCompareControls();
         renderPlot();
       });
     });
   }
+
+  addCountrySelect.addEventListener('change', e => {
+    const noc = e.target.value;
+    if (!noc) return;
+    if (!state.compareNocs.includes(noc)) state.compareNocs.push(noc);
+    renderCompareControls();
+    renderPlot();
+  });
 
   // === Render year controls (1 seule annee active dans les 2 modes) ===
   function renderYearControls() {
@@ -426,7 +464,7 @@ fetch('data/per_sport_predictions.json').then(r => r.json()).then(data => {
       singleRow.classList.toggle('hidden', state.mode !== 'single');
       compareRow.classList.toggle('hidden', state.mode !== 'compare');
       yearLabelEl.textContent = 'Année :';
-      renderCountryChips();
+      renderCompareControls();
       renderYearControls();
       renderPlot();
     });
@@ -535,7 +573,7 @@ fetch('data/per_sport_predictions.json').then(r => r.json()).then(data => {
   // === Init ===
   select.value = 'USA';
   state.noc = 'USA';
-  renderCountryChips();
+  renderCompareControls();
   renderYearControls();
   renderPlot();
 
@@ -550,10 +588,14 @@ fetch('data/per_sport_predictions.json').then(r => r.json()).then(data => {
 fetch('data/per_sport_predictions.json').then(r => r.json()).then(data => {
   const select = document.getElementById('evo-country-select');
   const totalEl = document.getElementById('evo-total');
-  const YEARS = [2000, 2004, 2008, 2012, 2016, 2020, 2024, 2028];
+  // Annees lues depuis les donnees (1952->2028)
+  const YEARS = (data[0] ? data[0].available_years : []).map(Number);
+  const N_REAL = YEARS.length - 1;  // index de bascule reel/predit (2028 = dernier)
 
+  // Pays tries alphabetiquement
+  const dataSorted = [...data].sort((a, b) => a.Country.localeCompare(b.Country, 'fr'));
   select.innerHTML = '<option value="">— Sélectionner un pays —</option>' +
-    data.map(d => `<option value="${d.NOC}">${d.Country}</option>`).join('');
+    dataSorted.map(d => `<option value="${d.NOC}">${d.Country}</option>`).join('');
 
   function render(noc) {
     const country = data.find(d => d.NOC === noc);
@@ -580,13 +622,13 @@ fetch('data/per_sport_predictions.json').then(r => r.json()).then(data => {
     const last = series.Total[series.Total.length - 1];
     totalEl.textContent = `${country.Country} — projection 2028 : ${last.toFixed(0)} médailles`;
 
-    // Axe X numerique (2000..2028). Le caractere "predit" de 2028 est gere
-    // par un segment pointille + une annotation, pas par le label d'axe.
+    // Axe X numerique (1952..2028). Le caractere "predit" de 2028 est gere
+    // par un segment pointille + une zone, pas par le label d'axe.
     // Une courbe par type : trait plein sur le reel (->2024), pointille 2024->2028.
     function makeTrace(key, color, emoji, frName, width) {
       const vals = series[key];
-      const realX = YEARS.slice(0, 7), realY = vals.slice(0, 7);   // 2000..2024
-      const predX = YEARS.slice(6), predY = vals.slice(6);          // 2024..2028
+      const realX = YEARS.slice(0, N_REAL), realY = vals.slice(0, N_REAL);   // ..2024
+      const predX = YEARS.slice(N_REAL - 1), predY = vals.slice(N_REAL - 1); // 2024..2028
       return [
         {
           x: realX, y: realY, type: 'scatter', mode: 'lines+markers',
@@ -611,23 +653,25 @@ fetch('data/per_sport_predictions.json').then(r => r.json()).then(data => {
       ...makeTrace('Bronze', COLORS.bronze, '🥉', 'Bronze', 2.5),
     ];
 
+    const yMin = YEARS[0], yLast = YEARS[N_REAL - 1];  // 1952, 2024
     Plotly.newPlot('plot-evolution', traces, {
       ...PLOTLY_LAYOUT,
-      title: { ...PLOTLY_LAYOUT.title, text: `${country.Country} — Évolution des médailles (2000 → 2028)` },
+      title: { ...PLOTLY_LAYOUT.title, text: `${country.Country} — Évolution des médailles (${yMin} → 2028)` },
       xaxis: {
         ...PLOTLY_LAYOUT.xaxis, title: '',
         tickmode: 'array', tickvals: YEARS,
         ticktext: YEARS.map(y => y === 2028 ? '2028 (prédit)' : String(y)),
-        range: [1998, 2030],
+        tickangle: -45,
+        range: [yMin - 2, 2030],
       },
       yaxis: { ...PLOTLY_LAYOUT.yaxis, title: 'Médailles', rangemode: 'tozero' },
-      // Bande grisee pour marquer la zone de prediction (2024 -> 2028)
+      // Bande rosee pour marquer la zone de prediction (2024 -> 2028)
       shapes: [{
         type: 'rect', xref: 'x', yref: 'paper',
-        x0: 2024, x1: 2030, y0: 0, y1: 1,
+        x0: yLast, x1: 2030, y0: 0, y1: 1,
         fillcolor: 'rgba(223,0,36,0.05)', line: { width: 0 }, layer: 'below',
       }],
-      margin: { l: 60, r: 30, t: 70, b: 50 },
+      margin: { l: 60, r: 30, t: 70, b: 70 },
       height: 520,
       hovermode: 'x unified',
     }, PLOTLY_CONFIG);
