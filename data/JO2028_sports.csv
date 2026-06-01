@@ -263,8 +263,10 @@ Swimming;Men 800M Freestyle;Male
 Swimming;Men 1500M Freestyle;Male
 Swimming;Men 50M Breaststroke;Male
 Swimming;Men 100M Breaststroke;Male
-Swimming;Men 100M Breaststroke;Male
 Swimming;Men 200M Breaststroke;Male
+Swimming;Men 50M Backstroke;Male
+Swimming;Men 100M Backstroke;Male
+Swimming;Men 200M Backstroke;Male
 Swimming;Men 50M Butterfly;Male
 Swimming;Men 100M Butterfly;Male
 Swimming;Men 200M Butterfly;Male
@@ -282,8 +284,10 @@ Swimming;Women 800M Freestyle;Female
 Swimming;Women 1500M Freestyle;Female
 Swimming;Women 50M Breaststroke;Female
 Swimming;Women 100M Breaststroke;Female
-Swimming;Women 100M Breaststroke;Female
 Swimming;Women 200M Breaststroke;Female
+Swimming;Women 50M Backstroke;Female
+Swimming;Women 100M Backstroke;Female
+Swimming;Women 200M Backstroke;Female
 Swimming;Women 50M Butterfly;Female
 Swimming;Women 100M Butterfly;Female
 Swimming;Women 200M Butterfly;Female
