@@ -92,8 +92,16 @@ app/
 |---|---|---|
 | (pays, sport) granulaire | R² | 0.14 |
 | (pays, sport) granulaire | MAE | 0.08 medaille |
-| **Pays agrege** | **R²** | **0.85** |
-| **Pays agrege** | **RMSE** | **4.2 medailles** |
+| **Pays agrege** | **R²** | **0.86** |
+| **Pays agrege** | **RMSE** | **4.5 medailles** |
+
+## Source des donnees
+
+Source primaire : **`olympics_1896_2024.csv`** (DjangoMustang/Olympics-1896-2024-Tableau).
+Choisie apres audit : match exact CIO sur 2016, 2020 et 2024 (les 3 dernieres editions).
+Quelques editions plus anciennes presentent +/-1 medaille par rapport au classement CIO actuel
+en raison de **reattributions post-Jeux** (DSQ pour dopage revelees apres coup), que les datasets
+publics ne refletent pas en temps reel.
 
 Le R² granulaire est faible car 90% des couples (pays, sport) sont des zeros.
 La metrique vraiment significative est **MAE = 0.08** (le modele se trompe en moyenne
@@ -106,16 +114,16 @@ predit avec une bonne fiabilite).
 
 | Rang | Pays | Or | Argent | Bronze | Total |
 |---|---|---|---|---|---|
-| 1 | USA (hote) | 39 | 35 | 26 | 100 |
-| 2 | Chine | 22 | 14 | 13 | 50 |
-| 3 | Japon | 12 | 6 | 9 | 28 |
-| 4 | Grande-Bretagne | 11 | 12 | 11 | 34 |
-| 5 | Australie | 8 | 7 | 10 | 26 |
-| 6 | Coree du Sud | 7 | 5 | 7 | 19 |
-| 7 | Pays-Bas | 7 | 6 | 7 | 20 |
-| 8 | Italie | 7 | 7 | 8 | 22 |
-| 9 | Allemagne | 6 | 7 | 8 | 21 |
-| 10 | France | 6 | 10 | 10 | 26 |
+| 1 | USA (hote) | 39 | 36 | 28 | 103 |
+| 2 | Chine | 28 | 18 | 16 | 61 |
+| 3 | Japon | 13 | 7 | 10 | 29 |
+| 4 | Grande-Bretagne | 11 | 14 | 15 | 40 |
+| 5 | Australie | 11 | 8 | 11 | 29 |
+| 6 | Italie | 8 | 8 | 10 | 27 |
+| 7 | Pays-Bas | 8 | 6 | 7 | 21 |
+| 8 | France | 8 | 11 | 11 | 30 |
+| 9 | Coree du Sud | 7 | 5 | 7 | 19 |
+| 10 | Allemagne | 7 | 8 | 11 | 25 |
 
 ---
 

@@ -25,8 +25,9 @@ env/
 .DS_Store
 Thumbs.db
 
-# Données brutes volumineuses (>50Mo)
-# Les CSV sont telecharges via le notebook 01_acquisition
+# Donnees sources : JO_resultats.csv et JO2028_sports.csv sont versionnees dans data/
+
+# Reliquats volumineux de l'ancien pipeline KeithGalli (non utilises par la refonte)
 data/raw/bios.csv
 data/raw/bios_locs.csv
 data/raw/results.csv
@@ -34,7 +35,7 @@ data/raw/results.csv
 # Données processees (regenerees par les notebooks)
 data/processed/
 
-# Modeles serialises (regeneres par notebook 05)
+# Modeles serialises (regeneres par notebook 03)
 models/*.pkl
 
 # Cache

@@ -21,10 +21,10 @@
       <img src="assets/img/olympic-rings.svg" alt="" class="rings-tiny" style="filter:brightness(0) invert(1);">
       <span>YPerf</span>
     </a>
-    <div class="hidden md:flex items-center gap-8 text-sm">
-      <a href="index.html">Accueil</a>
-      <a href="predict.html">Prédictions LA 2028</a>
-      <a href="methodology.html" class="text-white">Méthodologie</a>
+    <div class="flex items-center gap-3 sm:gap-6 md:gap-8 text-xs sm:text-sm">
+      <a href="index.html" class="whitespace-nowrap">Accueil</a>
+      <a href="predict.html" class="whitespace-nowrap">Prédictions<span class="hidden md:inline"> LA 2028</span></a>
+      <a href="methodology.html" class="text-white whitespace-nowrap">Méthodologie</a>
     </div>
   </div>
 </nav>
@@ -50,16 +50,17 @@
     <div class="grid grid-cols-1 gap-6 my-8">
       <div class="bg-white rounded-2xl p-8 border border-slate-200">
         <div class="text-xs font-bold tracking-widest uppercase mb-2" style="color: var(--olympic-blue);">Étape 01 — Acquisition</div>
-        <h3 class="font-serif font-bold text-2xl mb-3">7 sources fusionnées</h3>
+        <h3 class="font-serif font-bold text-2xl mb-3">Deux sources versionnées</h3>
         <p class="text-slate-600 leading-relaxed mb-4">
-          Données issues de <a href="https://github.com/KeithGalli/Olympics-Dataset" class="text-blue-600 hover:underline" target="_blank">KeithGalli/Olympics-Dataset</a> (scraping Olympedia)
-          et <a href="https://github.com/DjangoMustang/Olympics-1896-2024-Tableau" class="text-blue-600 hover:underline" target="_blank">DjangoMustang/Olympics-1896-2024-Tableau</a>
-          (incluant Paris 2024).
+          <code class="bg-slate-100 px-2 py-0.5 rounded text-xs">JO_resultats.csv</code> : résultats
+          olympiques 1896→2024 (incluant Paris 2024), validés contre les chiffres officiels du CIO.
+          <code class="bg-slate-100 px-2 py-0.5 rounded text-xs">JO2028_sports.csv</code> : programme
+          officiel des disciplines de Los Angeles 2028.
         </p>
         <ul class="text-sm text-slate-500 space-y-1 list-disc list-inside">
-          <li>308 000 participations brutes</li>
-          <li>230 pays (NOC)</li>
-          <li>1896 → 2024</li>
+          <li>24 000 résultats individuels</li>
+          <li>159 pays (NOC)</li>
+          <li>1896 → 2024 + programme 2028</li>
         </ul>
       </div>
 
@@ -71,8 +72,8 @@
           Enrichissement avec la population (Banque Mondiale) et le continent.
         </p>
         <ul class="text-sm text-slate-500 space-y-1 list-disc list-inside">
-          <li><code class="bg-slate-100 px-2 py-0.5 rounded text-xs">medals_per_country_sport.csv</code> — 6 871 lignes</li>
-          <li>30 éditions × 157 pays × 90 sports</li>
+          <li><code class="bg-slate-100 px-2 py-0.5 rounded text-xs">medals_per_country_sport.csv</code> — 7 454 lignes</li>
+          <li>30 éditions × 159 pays × 85 sports</li>
           <li>Colonnes : Year, NOC, Country, Sport, Gold, Silver, Bronze, Total, Population, Continent</li>
         </ul>
       </div>
@@ -137,8 +138,10 @@
     <h2 class="font-serif font-black text-3xl md:text-4xl mt-16 mb-6">Limites assumées</h2>
 
     <div class="bg-amber-50 border-l-4 border-amber-500 p-5 rounded-r-xl text-slate-700 mb-4">
-      <strong>Nouveaux sports 2028 absents.</strong> Cricket, lacrosse, flag football, baseball/softball,
-      squash entrent au programme. Le modèle ne peut pas les prédire car il n'a aucun historique.
+      <strong>Nouveaux sports 2028 absents.</strong> En croisant le programme officiel
+      (<code class="bg-white px-2 py-0.5 rounded text-sm">JO2028_sports.csv</code>) avec l'historique,
+      on identifie automatiquement les disciplines sans passé olympique : flag football, squash et
+      le rowing coastal beach sprint. Le modèle ne peut pas les prédire faute d'historique.
     </div>
 
     <div class="bg-amber-50 border-l-4 border-amber-500 p-5 rounded-r-xl text-slate-700 mb-4">

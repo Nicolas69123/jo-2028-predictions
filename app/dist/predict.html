@@ -22,10 +22,10 @@
       <img src="assets/img/olympic-rings.svg" alt="" class="rings-tiny" style="filter:brightness(0) invert(1);">
       <span>YPerf</span>
     </a>
-    <div class="hidden md:flex items-center gap-8 text-sm">
-      <a href="index.html">Accueil</a>
-      <a href="predict.html" class="text-white">Prédictions LA 2028</a>
-      <a href="methodology.html">Méthodologie</a>
+    <div class="flex items-center gap-3 sm:gap-6 md:gap-8 text-xs sm:text-sm">
+      <a href="index.html" class="whitespace-nowrap">Accueil</a>
+      <a href="predict.html" class="text-white whitespace-nowrap">Prédictions<span class="hidden md:inline"> LA 2028</span></a>
+      <a href="methodology.html" class="whitespace-nowrap">Méthodologie</a>
     </div>
   </div>
 </nav>
@@ -101,14 +101,23 @@
     <div class="eyebrow">Détail par sport</div>
     <h2 class="font-serif font-black text-4xl md:text-5xl mb-4">Cote par discipline</h2>
     <p class="text-lg text-slate-600 max-w-2xl mx-auto">
-      Choisissez un pays et une année pour explorer les médailles par discipline.
-      Vous pouvez aussi comparer plusieurs éditions côte à côte.
+      Explorez les médailles d'un pays par discipline, ou comparez plusieurs pays
+      sur une même édition. Chaque pays comparé apparaît sur sa propre ligne.
     </p>
   </div>
 
   <div class="bg-white p-5 rounded-2xl border border-slate-200 mb-4 space-y-4">
-    <!-- Pays -->
+    <!-- Mode d'affichage -->
     <div class="flex items-center gap-4 flex-wrap">
+      <label class="text-sm font-semibold text-slate-700 w-24">Mode :</label>
+      <div class="flex gap-2" id="mode-toggle">
+        <button data-mode="single" class="mode-btn px-4 py-2 rounded-full text-sm font-medium border transition" style="background: var(--olympic-blue); color: white; border-color: var(--olympic-blue);">Un pays par sport</button>
+        <button data-mode="compare" class="mode-btn px-4 py-2 rounded-full text-sm font-medium border transition" style="background: white; color: var(--ink); border-color: rgba(0,0,0,0.12);">Comparer des pays</button>
+      </div>
+    </div>
+
+    <!-- Pays (mode single : 1 pays) -->
+    <div class="flex items-center gap-4 flex-wrap" id="single-country-row">
       <label for="country-select" class="text-sm font-semibold text-slate-700 w-24">Pays :</label>
       <select id="country-select" class="country-select" style="min-width: 220px;">
         <option value="">Chargement...</option>
@@ -116,18 +125,25 @@
       <span class="text-xs text-slate-500 ml-auto" id="country-total">—</span>
     </div>
 
-    <!-- Mode d'affichage -->
-    <div class="flex items-center gap-4 flex-wrap">
-      <label class="text-sm font-semibold text-slate-700 w-24">Mode :</label>
-      <div class="flex gap-2" id="mode-toggle">
-        <button data-mode="single" class="mode-btn px-4 py-2 rounded-full text-sm font-medium border transition" style="background: var(--olympic-blue); color: white; border-color: var(--olympic-blue);">Année unique</button>
-        <button data-mode="compare" class="mode-btn px-4 py-2 rounded-full text-sm font-medium border transition" style="background: white; color: var(--ink); border-color: rgba(0,0,0,0.12);">Comparer années</button>
+    <!-- Pays (mode compare : multi-pays via dropdown + tags) -->
+    <div class="flex items-start gap-4 flex-wrap hidden" id="compare-country-row">
+      <label for="add-country-select" class="text-sm font-semibold text-slate-700 w-24 pt-2">Pays :</label>
+      <div class="flex-1">
+        <div class="flex items-center gap-3 flex-wrap mb-2">
+          <select id="add-country-select" class="country-select" style="min-width: 220px;">
+            <option value="">+ Ajouter un pays…</option>
+          </select>
+          <span class="text-xs text-slate-400" id="compare-hint">jusqu'à 6 pays</span>
+        </div>
+        <div id="country-tags" class="flex flex-wrap gap-2">
+          <!-- Tags pays selectionnes (filled by JS) -->
+        </div>
       </div>
     </div>
 
-    <!-- Selecteur(s) d'annee -->
+    <!-- Selecteur d'annee -->
     <div class="flex items-start gap-4 flex-wrap">
-      <label class="text-sm font-semibold text-slate-700 w-24 pt-2">Année(s) :</label>
+      <label class="text-sm font-semibold text-slate-700 w-24 pt-2" id="year-label">Année :</label>
       <div id="year-controls" class="flex-1 flex flex-wrap gap-2">
         <!-- Filled by JS depending on mode -->
       </div>
@@ -140,9 +156,10 @@
 
   <div class="bg-blue-50 border-l-4 border-blue-500 p-5 rounded-r-xl text-sm text-slate-700 mt-8">
     <strong>Note de lecture :</strong> chaque barre montre les médailles
-    <strong style="color: #D4AF37;">Or</strong>,
-    <strong style="color: #94a3b8;">Argent</strong> et
-    <strong style="color: #cd7f32;">Bronze</strong> empilées.
+    🥇 <strong style="color: #D4AF37;">Or</strong>,
+    🥈 <strong style="color: #94a3b8;">Argent</strong> et
+    🥉 <strong style="color: #cd7f32;">Bronze</strong> empilées.
+    En mode comparaison, chaque pays occupe sa propre ligne.
     L'année <strong>2028</strong> est une prédiction du modèle ; toutes les autres années sont des données réelles.
   </div>
 
@@ -158,6 +175,20 @@
       background: var(--olympic-blue); color: white;
       border-color: var(--olympic-blue);
     }
+    .country-tag {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.4rem 0.5rem 0.4rem 0.9rem; border-radius: 100px;
+      background: var(--olympic-blue); color: white;
+      font-size: 0.85rem; font-weight: 500; font-family: inherit;
+    }
+    .country-tag button {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 18px; height: 18px; border-radius: 50%;
+      background: rgba(255,255,255,0.25); color: white; border: none;
+      cursor: pointer; font-size: 0.75rem; line-height: 1; padding: 0;
+      transition: background 0.15s;
+    }
+    .country-tag button:hover { background: rgba(255,255,255,0.5); }
     .year-chip.pred {
       border-style: dashed; border-color: var(--olympic-red);
       color: var(--olympic-red);
@@ -169,6 +200,39 @@
     .mode-btn { cursor: pointer; font-family: inherit; }
   </style>
 
+</section>
+
+
+<!-- EVOLUTION DANS LE TEMPS -->
+<section class="section">
+  <div class="text-center mb-8">
+    <div class="eyebrow">Trajectoire historique</div>
+    <h2 class="font-serif font-black text-4xl md:text-5xl mb-4">Évolution dans le temps</h2>
+    <p class="text-lg text-slate-600 max-w-2xl mx-auto">
+      Comment le nombre de médailles d'un pays a évolué de 2000 à aujourd'hui,
+      et ce que le modèle projette pour LA 2028 (zone en pointillé).
+    </p>
+  </div>
+
+  <div class="bg-white p-5 rounded-2xl border border-slate-200 mb-4">
+    <div class="flex items-center gap-4 flex-wrap">
+      <label for="evo-country-select" class="text-sm font-semibold text-slate-700 w-24">Pays :</label>
+      <select id="evo-country-select" class="country-select" style="min-width: 220px;">
+        <option value="">Chargement...</option>
+      </select>
+      <span class="text-xs text-slate-500 ml-auto" id="evo-total">—</span>
+    </div>
+  </div>
+
+  <div class="plot-container">
+    <div id="plot-evolution" style="height: 520px;"></div>
+  </div>
+
+  <div class="bg-blue-50 border-l-4 border-blue-500 p-5 rounded-r-xl text-sm text-slate-700 mt-8">
+    <strong>Note de lecture :</strong> chaque courbe suit un type de médaille
+    (🥇 Or, 🥈 Argent, 🥉 Bronze) plus le total. Le dernier point (<strong>2028</strong>)
+    est une prédiction du modèle, relié par un trait en pointillé.
+  </div>
 </section>
 
 
@@ -302,62 +366,84 @@ fetch('data/projection_2028.json').then(r => r.json()).then(data => {
 });
 
 
-// === COTE PAR DISCIPLINE (avec selecteur multi-annee) ===
+// === COTE PAR DISCIPLINE / COMPARAISON PAYS ===
 fetch('data/per_sport_predictions.json').then(r => r.json()).then(data => {
   const select = document.getElementById('country-select');
   const totalEl = document.getElementById('country-total');
   const yearControlsEl = document.getElementById('year-controls');
+  const yearLabelEl = document.getElementById('year-label');
   const modeToggleEl = document.getElementById('mode-toggle');
+  const addCountrySelect = document.getElementById('add-country-select');
+  const countryTagsEl = document.getElementById('country-tags');
+  const singleRow = document.getElementById('single-country-row');
+  const compareRow = document.getElementById('compare-country-row');
+
+  // Annees disponibles, lues depuis les donnees (1952->2028)
+  const ALL_YEARS = (data[0] ? data[0].available_years : []).map(Number);
+
+  // Pays tries par ordre alphabetique pour les selecteurs/chips
+  const dataSorted = [...data].sort((a, b) => a.Country.localeCompare(b.Country, 'fr'));
 
   // State global
   const state = {
-    noc: 'USA',
-    mode: 'single',        // 'single' ou 'compare'
-    selectedYears: [2028], // tableau d'annees actives
+    mode: 'single',          // 'single' ou 'compare'
+    noc: 'USA',              // pays selectionne (mode single)
+    selectedYear: 2028,      // annee active (les 2 modes)
+    compareNocs: ['USA', 'CHN', 'FRA'],  // pays compares (mode compare)
   };
 
-  // Populate dropdown pays
+  // Populate dropdown pays (mode single) -- ordre alphabetique
   select.innerHTML = '<option value="">— Sélectionner un pays —</option>' +
-    data.map(d => `<option value="${d.NOC}">${d.Country}</option>`).join('');
+    dataSorted.map(d => `<option value="${d.NOC}">${d.Country}</option>`).join('');
 
-  // === Render year controls (depend du mode) ===
+  const nameOf = noc => (data.find(d => d.NOC === noc) || {}).Country || noc;
+
+  // === Mode compare : dropdown "ajouter" + tags des pays selectionnes ===
+  function renderCompareControls() {
+    // Dropdown : seulement les pays PAS encore selectionnes, ordre alpha
+    const available = dataSorted.filter(d => !state.compareNocs.includes(d.NOC));
+    const atMax = state.compareNocs.length >= 6;
+    addCountrySelect.innerHTML =
+      `<option value="">${atMax ? 'Maximum 6 pays atteint' : '+ Ajouter un pays…'}</option>` +
+      available.map(d => `<option value="${d.NOC}">${d.Country}</option>`).join('');
+    addCountrySelect.disabled = atMax;
+
+    // Tags des pays choisis (dans l'ordre de selection), avec bouton supprimer
+    countryTagsEl.innerHTML = state.compareNocs.map(noc =>
+      `<span class="country-tag">${nameOf(noc)}<button data-noc="${noc}" title="Retirer" aria-label="Retirer ${nameOf(noc)}">✕</button></span>`
+    ).join('');
+
+    countryTagsEl.querySelectorAll('button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (state.compareNocs.length === 1) { alert('Au moins un pays doit être sélectionné'); return; }
+        state.compareNocs = state.compareNocs.filter(n => n !== btn.dataset.noc);
+        renderCompareControls();
+        renderPlot();
+      });
+    });
+  }
+
+  addCountrySelect.addEventListener('change', e => {
+    const noc = e.target.value;
+    if (!noc) return;
+    if (!state.compareNocs.includes(noc)) state.compareNocs.push(noc);
+    renderCompareControls();
+    renderPlot();
+  });
+
+  // === Render year controls (1 seule annee active dans les 2 modes) ===
   function renderYearControls() {
-    const country = data.find(d => d.NOC === state.noc);
-    if (!country) return;
-    const years = country.available_years;
-
-    yearControlsEl.innerHTML = years.map(y => {
+    yearControlsEl.innerHTML = ALL_YEARS.map(y => {
       const isPred = y === 2028;
-      const active = state.selectedYears.includes(y);
+      const active = state.selectedYear === y;
       return `<button class="year-chip ${active ? 'active' : ''} ${isPred ? 'pred' : ''}" data-year="${y}">
         ${y}${isPred ? ' (prédit)' : ''}
       </button>`;
     }).join('');
 
-    // Click handler sur chaque chip
     yearControlsEl.querySelectorAll('.year-chip').forEach(btn => {
       btn.addEventListener('click', () => {
-        const y = parseInt(btn.dataset.year);
-        if (state.mode === 'single') {
-          state.selectedYears = [y];
-        } else {
-          // compare mode : toggle l'annee
-          const idx = state.selectedYears.indexOf(y);
-          if (idx === -1) {
-            if (state.selectedYears.length >= 4) {
-              alert('Maximum 4 années en mode comparaison');
-              return;
-            }
-            state.selectedYears.push(y);
-          } else {
-            if (state.selectedYears.length === 1) {
-              alert('Au moins une année doit être sélectionnée');
-              return;
-            }
-            state.selectedYears.splice(idx, 1);
-          }
-          state.selectedYears.sort();
-        }
+        state.selectedYear = parseInt(btn.dataset.year);
         renderYearControls();
         renderPlot();
       });
@@ -368,35 +454,26 @@ fetch('data/per_sport_predictions.json').then(r => r.json()).then(data => {
   modeToggleEl.querySelectorAll('.mode-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       state.mode = btn.dataset.mode;
-      // Update visuel des boutons
       modeToggleEl.querySelectorAll('.mode-btn').forEach(b => {
-        if (b.dataset.mode === state.mode) {
-          b.style.background = 'var(--olympic-blue)';
-          b.style.color = 'white';
-          b.style.borderColor = 'var(--olympic-blue)';
-        } else {
-          b.style.background = 'white';
-          b.style.color = 'var(--ink)';
-          b.style.borderColor = 'rgba(0,0,0,0.12)';
-        }
+        const on = b.dataset.mode === state.mode;
+        b.style.background = on ? 'var(--olympic-blue)' : 'white';
+        b.style.color = on ? 'white' : 'var(--ink)';
+        b.style.borderColor = on ? 'var(--olympic-blue)' : 'rgba(0,0,0,0.12)';
       });
-
-      // Reset selection selon le mode
-      if (state.mode === 'single') {
-        state.selectedYears = [state.selectedYears[state.selectedYears.length - 1] || 2028];
-      } else {
-        // Pre-cocher 2024 et 2028 par defaut
-        if (state.selectedYears.length < 2) {
-          state.selectedYears = [2024, 2028];
-        }
-      }
+      // Afficher la bonne ligne de selection pays
+      singleRow.classList.toggle('hidden', state.mode !== 'single');
+      compareRow.classList.toggle('hidden', state.mode !== 'compare');
+      yearLabelEl.textContent = 'Année :';
+      renderCompareControls();
       renderYearControls();
       renderPlot();
     });
   });
 
-  // === Render le graph principal ===
-  function renderPlot() {
+  const yearLbl = y => y === 2028 ? `${y} (prédit)` : `${y}`;
+
+  // === MODE SINGLE : 1 pays, medailles par sport ===
+  function renderSingle() {
     const country = data.find(d => d.NOC === state.noc);
     if (!country) {
       document.getElementById('plot-per-sport').innerHTML =
@@ -404,95 +481,33 @@ fetch('data/per_sport_predictions.json').then(r => r.json()).then(data => {
       totalEl.textContent = '—';
       return;
     }
+    const year = state.selectedYear;
+    const records = country.by_year[String(year)] || [];
 
-    const sports = country.sports_list;  // liste des 15 sports du pays
-    const years = state.selectedYears;
+    // Sports tries par total croissant (barh => le plus gros en haut)
+    const rows = country.sports_list
+      .map(sport => records.find(r => r.Sport === sport) || { Sport: sport, Gold: 0, Silver: 0, Bronze: 0, Total: 0 })
+      .sort((a, b) => a.Total - b.Total);
 
-    // Trier les sports par total decroissant (toutes annees confondues)
-    const sportTotals = sports.map(sport => {
-      let total = 0;
-      years.forEach(y => {
-        const records = country.by_year[String(y)] || [];
-        const r = records.find(rr => rr.Sport === sport);
-        if (r) total += r.Total;
-      });
-      return { sport, total };
-    });
-    sportTotals.sort((a, b) => a.total - b.total);  // ascending pour barh
-    const sortedSports = sportTotals.map(s => s.sport);
+    const sports = rows.map(r => r.Sport);
+    const grandTotal = rows.reduce((s, r) => s + r.Total, 0);
+    totalEl.textContent = `${country.Country} — ${yearLbl(year)} : ${grandTotal.toFixed(0)} médailles`;
 
-    // Mise a jour du total
-    const grandTotal = sportTotals.reduce((s, x) => s + x.total, 0);
-    const yearsLabel = years.map(y => y === 2028 ? '2028 (prédit)' : y).join(' + ');
-    totalEl.textContent = `${country.Country} — ${yearsLabel} : ${grandTotal.toFixed(0)} médailles cumulées`;
-
-    // === Construction des traces ===
-    // Une trace par (annee, couleur) = 3 traces par annee (Or, Argent, Bronze)
-    // Empilage barmode='stack' avec offsetgroup par annee pour les avoir cote-a-cote
-    const traces = [];
-
-    years.forEach((year, yearIdx) => {
-      const records = country.by_year[String(year)] || [];
-      const yearLabel = year === 2028 ? `${year} (prédit)` : `${year}`;
-
-      // Pour chaque sport, recuperer la valeur
-      const recordsBysport = sortedSports.map(sport =>
-        records.find(r => r.Sport === sport) || { Sport: sport, Gold: 0, Silver: 0, Bronze: 0, Total: 0 }
-      );
-
-      // Or (groupe par annee pour cote-a-cote)
-      traces.push({
-        x: recordsBysport.map(r => r.Gold),
-        y: sortedSports,
-        type: 'bar',
-        orientation: 'h',
-        name: `Or ${yearLabel}`,
-        marker: { color: COLORS.gold, opacity: year === 2028 ? 1 : (0.5 + yearIdx * 0.15) },
-        offsetgroup: String(year),
-        legendgroup: String(year),
-        hovertemplate: `<b>%{y}</b><br>${yearLabel} -- Or : %{x:.1f}<extra></extra>`,
-        showlegend: yearIdx === 0,  // Une seule entree legende pour Or
-      });
-      traces.push({
-        x: recordsBysport.map(r => r.Silver),
-        y: sortedSports,
-        type: 'bar',
-        orientation: 'h',
-        name: `Argent ${yearLabel}`,
-        marker: { color: COLORS.silver, opacity: year === 2028 ? 1 : (0.5 + yearIdx * 0.15) },
-        offsetgroup: String(year),
-        legendgroup: String(year),
-        hovertemplate: `<b>%{y}</b><br>${yearLabel} -- Argent : %{x:.1f}<extra></extra>`,
-        showlegend: yearIdx === 0,
-      });
-      traces.push({
-        x: recordsBysport.map(r => r.Bronze),
-        y: sortedSports,
-        type: 'bar',
-        orientation: 'h',
-        name: `Bronze ${yearLabel}`,
-        marker: { color: COLORS.bronze, opacity: year === 2028 ? 1 : (0.5 + yearIdx * 0.15) },
-        offsetgroup: String(year),
-        legendgroup: String(year),
-        hovertemplate: `<b>%{y}</b><br>${yearLabel} -- Bronze : %{x:.1f}<extra></extra>`,
-        showlegend: yearIdx === 0,
-      });
+    const mk = (key, color, emoji) => ({
+      x: rows.map(r => r[key]), y: sports, type: 'bar', orientation: 'h',
+      name: `${emoji} ${key === 'Gold' ? 'Or' : key === 'Silver' ? 'Argent' : 'Bronze'}`,
+      marker: { color },
+      hovertemplate: `<b>%{y}</b><br>${emoji} %{x:.1f}<extra></extra>`,
     });
 
-    // Build title
-    let title;
-    if (state.mode === 'single') {
-      title = `${country.Country} — Médailles ${yearsLabel}`;
-    } else {
-      title = `${country.Country} — Comparaison ${yearsLabel}`;
-    }
-
-    // === Plot ===
-    Plotly.newPlot('plot-per-sport', traces, {
+    Plotly.newPlot('plot-per-sport', [
+      mk('Gold', COLORS.gold, '🥇'),
+      mk('Silver', COLORS.silver, '🥈'),
+      mk('Bronze', COLORS.bronze, '🥉'),
+    ], {
       ...PLOTLY_LAYOUT,
-      title: { ...PLOTLY_LAYOUT.title, text: title },
-      barmode: 'stack',         // Or/Argent/Bronze empiles dans la meme annee
-      bargroupgap: 0.15,        // espace entre les groupes d'annees
+      title: { ...PLOTLY_LAYOUT.title, text: `${country.Country} — Médailles par discipline (${yearLbl(year)})` },
+      barmode: 'stack',
       xaxis: { ...PLOTLY_LAYOUT.xaxis, title: 'Médailles' },
       yaxis: { ...PLOTLY_LAYOUT.yaxis, title: '', automargin: true },
       margin: { l: 200, r: 30, t: 70, b: 50 },
@@ -500,17 +515,172 @@ fetch('data/per_sport_predictions.json').then(r => r.json()).then(data => {
     }, PLOTLY_CONFIG);
   }
 
+  // === MODE COMPARE : plusieurs pays, 1 ligne par pays ===
+  function renderCompare() {
+    const year = state.selectedYear;
+
+    // Une ligne par pays : on somme Or/Argent/Bronze sur tous les sports de ce pays pour l'annee
+    const rows = state.compareNocs.map(noc => {
+      const c = data.find(d => d.NOC === noc);
+      const records = c ? (c.by_year[String(year)] || []) : [];
+      const gold = records.reduce((s, r) => s + r.Gold, 0);
+      const silver = records.reduce((s, r) => s + r.Silver, 0);
+      const bronze = records.reduce((s, r) => s + r.Bronze, 0);
+      return { noc, name: c ? c.Country : noc, gold, silver, bronze, total: gold + silver + bronze };
+    });
+
+    // Tri par total croissant (barh => le plus medaille en haut)
+    rows.sort((a, b) => a.total - b.total);
+    const labels = rows.map(r => r.name);
+
+    totalEl.textContent = `Comparaison ${state.compareNocs.length} pays — ${yearLbl(year)}`;
+
+    const mk = (key, color, emoji, frName) => ({
+      x: rows.map(r => r[key]), y: labels, type: 'bar', orientation: 'h',
+      name: `${emoji} ${frName}`,
+      marker: { color },
+      hovertemplate: `<b>%{y}</b><br>${emoji} ${frName} : %{x:.0f}<extra></extra>`,
+    });
+
+    // Annotation du total a cote de chaque barre (avec emojis du detail)
+    const annotations = rows.map(r => ({
+      x: r.total, y: r.name, xanchor: 'left', yanchor: 'middle',
+      text: `  🥇${r.gold.toFixed(0)} 🥈${r.silver.toFixed(0)} 🥉${r.bronze.toFixed(0)}`,
+      showarrow: false, font: { size: 12, color: '#475569' },
+    }));
+
+    Plotly.newPlot('plot-per-sport', [
+      mk('gold', COLORS.gold, '🥇', 'Or'),
+      mk('silver', COLORS.silver, '🥈', 'Argent'),
+      mk('bronze', COLORS.bronze, '🥉', 'Bronze'),
+    ], {
+      ...PLOTLY_LAYOUT,
+      title: { ...PLOTLY_LAYOUT.title, text: `Comparaison des pays — ${yearLbl(year)}` },
+      barmode: 'stack',
+      annotations,
+      xaxis: { ...PLOTLY_LAYOUT.xaxis, title: 'Médailles' },
+      yaxis: { ...PLOTLY_LAYOUT.yaxis, title: '', automargin: true },
+      margin: { l: 200, r: 90, t: 70, b: 50 },
+      height: Math.max(360, 90 + rows.length * 70),
+    }, PLOTLY_CONFIG);
+  }
+
+  function renderPlot() {
+    if (state.mode === 'single') renderSingle();
+    else renderCompare();
+  }
+
   // === Init ===
   select.value = 'USA';
   state.noc = 'USA';
+  renderCompareControls();
   renderYearControls();
   renderPlot();
 
   select.addEventListener('change', e => {
     state.noc = e.target.value;
-    renderYearControls();
     renderPlot();
   });
+});
+
+
+// === EVOLUTION DANS LE TEMPS (courbes Or/Argent/Bronze/Total) ===
+fetch('data/per_sport_predictions.json').then(r => r.json()).then(data => {
+  const select = document.getElementById('evo-country-select');
+  const totalEl = document.getElementById('evo-total');
+  // Annees lues depuis les donnees (1952->2028)
+  const YEARS = (data[0] ? data[0].available_years : []).map(Number);
+  const N_REAL = YEARS.length - 1;  // index de bascule reel/predit (2028 = dernier)
+
+  // Pays tries alphabetiquement
+  const dataSorted = [...data].sort((a, b) => a.Country.localeCompare(b.Country, 'fr'));
+  select.innerHTML = '<option value="">— Sélectionner un pays —</option>' +
+    dataSorted.map(d => `<option value="${d.NOC}">${d.Country}</option>`).join('');
+
+  function render(noc) {
+    const country = data.find(d => d.NOC === noc);
+    if (!country) {
+      document.getElementById('plot-evolution').innerHTML =
+        '<div class="text-center text-slate-400 py-32">Sélectionnez un pays pour voir son évolution.</div>';
+      totalEl.textContent = '—';
+      return;
+    }
+
+    // Sommer Or/Argent/Bronze sur tous les sports, pour chaque annee
+    const series = { Gold: [], Silver: [], Bronze: [], Total: [] };
+    YEARS.forEach(y => {
+      const records = country.by_year[String(y)] || [];
+      const g = records.reduce((s, r) => s + r.Gold, 0);
+      const s = records.reduce((a, r) => a + r.Silver, 0);
+      const b = records.reduce((a, r) => a + r.Bronze, 0);
+      series.Gold.push(g);
+      series.Silver.push(s);
+      series.Bronze.push(b);
+      series.Total.push(g + s + b);
+    });
+
+    const last = series.Total[series.Total.length - 1];
+    totalEl.textContent = `${country.Country} — projection 2028 : ${last.toFixed(0)} médailles`;
+
+    // Axe X numerique (1952..2028). Le caractere "predit" de 2028 est gere
+    // par un segment pointille + une zone, pas par le label d'axe.
+    // Une courbe par type : trait plein sur le reel (->2024), pointille 2024->2028.
+    function makeTrace(key, color, emoji, frName, width) {
+      const vals = series[key];
+      const realX = YEARS.slice(0, N_REAL), realY = vals.slice(0, N_REAL);   // ..2024
+      const predX = YEARS.slice(N_REAL - 1), predY = vals.slice(N_REAL - 1); // 2024..2028
+      return [
+        {
+          x: realX, y: realY, type: 'scatter', mode: 'lines+markers',
+          name: `${emoji} ${frName}`, legendgroup: key,
+          line: { color, width }, marker: { color, size: 7 },
+          hovertemplate: `<b>%{x}</b><br>${emoji} ${frName} : %{y:.0f}<extra></extra>`,
+        },
+        {
+          x: predX, y: predY, type: 'scatter', mode: 'lines+markers',
+          name: `${emoji} ${frName}`, legendgroup: key, showlegend: false,
+          line: { color, width, dash: 'dot' },
+          marker: { color, size: 8, symbol: 'diamond' },
+          hovertemplate: `<b>%{x} (prédit)</b><br>${emoji} ${frName} : %{y:.0f}<extra></extra>`,
+        },
+      ];
+    }
+
+    const traces = [
+      ...makeTrace('Total', '#0085C7', '', 'Total', 4),
+      ...makeTrace('Gold', COLORS.gold, '🥇', 'Or', 2.5),
+      ...makeTrace('Silver', COLORS.silver, '🥈', 'Argent', 2.5),
+      ...makeTrace('Bronze', COLORS.bronze, '🥉', 'Bronze', 2.5),
+    ];
+
+    const yMin = YEARS[0], yLast = YEARS[N_REAL - 1];  // 1952, 2024
+    Plotly.newPlot('plot-evolution', traces, {
+      ...PLOTLY_LAYOUT,
+      title: { ...PLOTLY_LAYOUT.title, text: `${country.Country} — Évolution des médailles (${yMin} → 2028)` },
+      xaxis: {
+        ...PLOTLY_LAYOUT.xaxis, title: '',
+        tickmode: 'array', tickvals: YEARS,
+        ticktext: YEARS.map(y => y === 2028 ? '2028 (prédit)' : String(y)),
+        tickangle: -45,
+        range: [yMin - 2, 2030],
+      },
+      yaxis: { ...PLOTLY_LAYOUT.yaxis, title: 'Médailles', rangemode: 'tozero' },
+      // Bande rosee pour marquer la zone de prediction (2024 -> 2028)
+      shapes: [{
+        type: 'rect', xref: 'x', yref: 'paper',
+        x0: yLast, x1: 2030, y0: 0, y1: 1,
+        fillcolor: 'rgba(223,0,36,0.05)', line: { width: 0 }, layer: 'below',
+      }],
+      margin: { l: 60, r: 30, t: 70, b: 70 },
+      height: 520,
+      hovermode: 'x unified',
+    }, PLOTLY_CONFIG);
+  }
+
+  // Init
+  select.value = 'USA';
+  render('USA');
+  select.addEventListener('change', e => render(e.target.value));
 });
 </script>
 
