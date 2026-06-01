@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prédictions LA 2028 — YPerf</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;700;800;900&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <link rel="stylesheet" href="assets/css/app.css">
+  <link rel="icon" type="image/svg+xml" href="assets/img/olympic-rings.svg">
+</head>
+
+<body>
+
+<nav class="app-nav">
+  <div class="max-w-7xl mx-auto flex items-center justify-between">
+    <a href="index.html" class="brand">
+      <img src="assets/img/olympic-rings.svg" alt="" class="rings-tiny" style="filter:brightness(0) invert(1);">
+      <span>YPerf</span>
+    </a>
+    <div class="hidden md:flex items-center gap-8 text-sm">
+      <a href="index.html">Accueil</a>
+      <a href="predict.html" class="text-white">Prédictions LA 2028</a>
+      <a href="methodology.html">Méthodologie</a>
+    </div>
+  </div>
+</nav>
+
+
+<!-- HERO PREDICT -->
+<section class="hero" style="min-height: 60vh;">
+  <div class="hero-bg" style="background-image: linear-gradient(180deg, rgba(10,14,26,0.55) 0%, rgba(10,14,26,0.96) 100%), url('assets/img/LA.jpg');"></div>
+  <div class="hero-content">
+    <img src="assets/img/olympic-rings.svg" alt="" class="rings-medium mx-auto mb-6" style="filter:brightness(0) invert(1);">
+    <div class="chip">Modèle de prédiction</div>
+    <h1 class="font-serif font-black leading-none" style="font-size: clamp(2.5rem, 8vw, 6rem);">
+      <span class="block">Los Angeles</span>
+      <span class="block text-rainbow">2028</span>
+    </h1>
+    <p class="font-serif italic text-lg md:text-xl mt-6 max-w-2xl mx-auto opacity-90">
+      Classement prédit et cote par discipline pour les prochains Jeux d'été.
+    </p>
+  </div>
+</section>
+
+
+<section class="section">
+
+  <!-- METRIQUES DU MODELE -->
+  <div class="text-center mb-8">
+    <div class="eyebrow">Performance du modèle</div>
+    <h2 class="font-serif font-black text-4xl md:text-5xl mb-4">Validé sur Paris 2024</h2>
+    <p class="text-lg text-slate-600 max-w-2xl mx-auto">
+      Le modèle n'a jamais vu Paris 2024 à l'entraînement. Voici comment il s'en sort
+      sur cette baseline avant la projection LA 2028.
+    </p>
+  </div>
+
+  <div class="kpi-grid mb-12" id="metrics-grid"></div>
+
+
+  <!-- CLASSEMENT LA 2028 -->
+  <div class="text-center mt-20 mb-8">
+    <div class="eyebrow">La prédiction</div>
+    <h2 class="font-serif font-black text-4xl md:text-5xl mb-4">Classement LA 2028</h2>
+    <p class="text-lg text-slate-600 max-w-2xl mx-auto">
+      Tableau officiel CIO : tri par Or, puis Argent, puis Bronze.
+      Les USA, pays hôte, sont massivement favorisés.
+    </p>
+  </div>
+
+  <div class="plot-container">
+    <div id="plot-top10" style="height: 550px;"></div>
+  </div>
+
+  <div class="overflow-x-auto mt-6">
+    <table class="medal-table" id="ranking-table">
+      <thead>
+        <tr>
+          <th>Rang</th>
+          <th>Pays</th>
+          <th class="text-right" style="color: #D4AF37;">Or</th>
+          <th class="text-right" style="color: #94a3b8;">Argent</th>
+          <th class="text-right" style="color: #cd7f32;">Bronze</th>
+          <th class="text-right">Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Filled by JS -->
+      </tbody>
+    </table>
+  </div>
+
+
+  <!-- COTE PAR DISCIPLINE -->
+  <div class="text-center mt-24 mb-8">
+    <div class="eyebrow">Détail par sport</div>
+    <h2 class="font-serif font-black text-4xl md:text-5xl mb-4">Cote par discipline</h2>
+    <p class="text-lg text-slate-600 max-w-2xl mx-auto">
+      Choisissez un pays et une année pour explorer les médailles par discipline.
+      Vous pouvez aussi comparer plusieurs éditions côte à côte.
+    </p>
+  </div>
+
+  <div class="bg-white p-5 rounded-2xl border border-slate-200 mb-4 space-y-4">
+    <!-- Pays -->
+    <div class="flex items-center gap-4 flex-wrap">
+      <label for="country-select" class="text-sm font-semibold text-slate-700 w-24">Pays :</label>
+      <select id="country-select" class="country-select" style="min-width: 220px;">
+        <option value="">Chargement...</option>
+      </select>
+      <span class="text-xs text-slate-500 ml-auto" id="country-total">—</span>
+    </div>
+
+    <!-- Mode d'affichage -->
+    <div class="flex items-center gap-4 flex-wrap">
+      <label class="text-sm font-semibold text-slate-700 w-24">Mode :</label>
+      <div class="flex gap-2" id="mode-toggle">
+        <button data-mode="single" class="mode-btn px-4 py-2 rounded-full text-sm font-medium border transition" style="background: var(--olympic-blue); color: white; border-color: var(--olympic-blue);">Année unique</button>
+        <button data-mode="compare" class="mode-btn px-4 py-2 rounded-full text-sm font-medium border transition" style="background: white; color: var(--ink); border-color: rgba(0,0,0,0.12);">Comparer années</button>
+      </div>
+    </div>
+
+    <!-- Selecteur(s) d'annee -->
+    <div class="flex items-start gap-4 flex-wrap">
+      <label class="text-sm font-semibold text-slate-700 w-24 pt-2">Année(s) :</label>
+      <div id="year-controls" class="flex-1 flex flex-wrap gap-2">
+        <!-- Filled by JS depending on mode -->
+      </div>
+    </div>
+  </div>
+
+  <div class="plot-container">
+    <div id="plot-per-sport" style="height: 700px;"></div>
+  </div>
+
+  <div class="bg-blue-50 border-l-4 border-blue-500 p-5 rounded-r-xl text-sm text-slate-700 mt-8">
+    <strong>Note de lecture :</strong> chaque barre montre les médailles
+    <strong style="color: #D4AF37;">Or</strong>,
+    <strong style="color: #94a3b8;">Argent</strong> et
+    <strong style="color: #cd7f32;">Bronze</strong> empilées.
+    L'année <strong>2028</strong> est une prédiction du modèle ; toutes les autres années sont des données réelles.
+  </div>
+
+  <style>
+    .year-chip {
+      padding: 0.5rem 1rem; border-radius: 100px;
+      border: 1px solid rgba(0,0,0,0.12); background: white;
+      font-size: 0.85rem; font-weight: 500; cursor: pointer;
+      transition: all 0.2s; font-family: inherit;
+    }
+    .year-chip:hover { border-color: var(--olympic-blue); }
+    .year-chip.active {
+      background: var(--olympic-blue); color: white;
+      border-color: var(--olympic-blue);
+    }
+    .year-chip.pred {
+      border-style: dashed; border-color: var(--olympic-red);
+      color: var(--olympic-red);
+    }
+    .year-chip.pred.active {
+      background: var(--olympic-red); color: white;
+      border-color: var(--olympic-red);
+    }
+    .mode-btn { cursor: pointer; font-family: inherit; }
+  </style>
+
+</section>
+
+
+<footer class="footer">
+  <img src="assets/img/olympic-rings.svg" alt="" class="rings-tiny mx-auto mb-3" style="filter:brightness(0) invert(1); opacity:0.7;">
+  <div class="font-serif font-bold text-2xl text-white mb-2">YPerf</div>
+  <p>Projet Bachelor 3 YNOV — UF SPÉ Data & IA — 2026</p>
+</footer>
+
+
+<script>
+const COLORS = {
+  blue: '#0085C7', yellow: '#F4C300', black: '#000000',
+  green: '#009F3D', red: '#DF0024',
+  gold: '#D4AF37', silver: '#94a3b8', bronze: '#cd7f32',
+};
+
+const PLOTLY_LAYOUT = {
+  paper_bgcolor: 'rgba(0,0,0,0)',
+  plot_bgcolor: 'rgba(0,0,0,0)',
+  font: { family: 'Inter', size: 13, color: '#0a0e1a' },
+  title: {
+    font: { family: '"Playfair Display", serif', size: 20, color: '#0a0e1a' },
+    x: 0.02, xanchor: 'left', pad: { t: 15, b: 15 },
+  },
+  margin: { l: 60, r: 30, t: 60, b: 50 },
+  xaxis: {
+    showgrid: true, gridcolor: 'rgba(0,0,0,0.06)',
+    tickfont: { size: 12, color: '#64748b' },
+    title: { font: { size: 13, color: '#64748b' } },
+  },
+  yaxis: {
+    showgrid: true, gridcolor: 'rgba(0,0,0,0.06)',
+    tickfont: { size: 12, color: '#64748b' },
+    title: { font: { size: 13, color: '#64748b' } },
+  },
+  legend: {
+    orientation: 'h', yanchor: 'bottom', y: 1.02, xanchor: 'right', x: 1,
+    bgcolor: 'rgba(255,255,255,0.7)', font: { size: 12 },
+  },
+  hoverlabel: { bgcolor: '#0a0e1a', font: { color: 'white', family: 'Inter' } },
+  barmode: 'stack',
+};
+
+const PLOTLY_CONFIG = {
+  responsive: true, displaylogo: false,
+  modeBarButtonsToRemove: ['lasso2d', 'select2d', 'autoScale2d'],
+};
+
+
+// === METRIQUES ===
+fetch('data/model_metrics.json').then(r => r.json()).then(m => {
+  document.getElementById('metrics-grid').innerHTML = `
+    <div class="kpi-card">
+      <div class="kpi-value">${m.country_level.r2.toFixed(2)}</div>
+      <div class="kpi-label">R² au niveau pays<br>(Paris 2024)</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-value">${m.country_level.rmse.toFixed(1)}</div>
+      <div class="kpi-label">RMSE moyen<br>médailles d'écart</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-value">${m.n_top_sports}</div>
+      <div class="kpi-label">Sports modélisés<br>top historique</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-value">3</div>
+      <div class="kpi-label">Modèles<br>Or / Argent / Bronze</div>
+    </div>
+  `;
+});
+
+
+// === CLASSEMENT LA 2028 ===
+fetch('data/projection_2028.json').then(r => r.json()).then(data => {
+  const top20 = data.slice(0, 20);
+
+  // Graph top 10 stacked bar
+  const top10 = data.slice(0, 10).reverse();
+  Plotly.newPlot('plot-top10', [
+    {
+      x: top10.map(d => d.Gold_2028),
+      y: top10.map(d => d.Country),
+      type: 'bar',
+      orientation: 'h',
+      name: 'Or',
+      marker: { color: COLORS.gold },
+      hovertemplate: '<b>%{y}</b><br>Or : %{x:.1f}<extra></extra>',
+    },
+    {
+      x: top10.map(d => d.Silver_2028),
+      y: top10.map(d => d.Country),
+      type: 'bar',
+      orientation: 'h',
+      name: 'Argent',
+      marker: { color: COLORS.silver },
+      hovertemplate: '<b>%{y}</b><br>Argent : %{x:.1f}<extra></extra>',
+    },
+    {
+      x: top10.map(d => d.Bronze_2028),
+      y: top10.map(d => d.Country),
+      type: 'bar',
+      orientation: 'h',
+      name: 'Bronze',
+      marker: { color: COLORS.bronze },
+      hovertemplate: '<b>%{y}</b><br>Bronze : %{x:.1f}<extra></extra>',
+    },
+  ], {
+    ...PLOTLY_LAYOUT,
+    title: { ...PLOTLY_LAYOUT.title, text: 'Top 10 prédit — LA 2028' },
+    xaxis: { ...PLOTLY_LAYOUT.xaxis, title: 'Médailles prédites' },
+    yaxis: { ...PLOTLY_LAYOUT.yaxis, title: '', automargin: true },
+    margin: { l: 130, r: 30, t: 60, b: 50 },
+  }, PLOTLY_CONFIG);
+
+  // Table top 20
+  const tbody = document.querySelector('#ranking-table tbody');
+  tbody.innerHTML = top20.map(d => {
+    const rankClass = d.Rank === 1 ? 'rank-1' : d.Rank === 2 ? 'rank-2' : d.Rank === 3 ? 'rank-3' : '';
+    return `
+      <tr>
+        <td><span class="rank ${rankClass}">${d.Rank}</span></td>
+        <td><span class="country-flag">${d.NOC}</span>${d.Country}</td>
+        <td class="text-right font-mono" style="color: ${COLORS.gold}; font-weight: 600;">${d.Gold_2028.toFixed(1)}</td>
+        <td class="text-right font-mono" style="color: ${COLORS.silver};">${d.Silver_2028.toFixed(1)}</td>
+        <td class="text-right font-mono" style="color: ${COLORS.bronze};">${d.Bronze_2028.toFixed(1)}</td>
+        <td class="text-right font-mono font-semibold">${d.Total_2028.toFixed(1)}</td>
+      </tr>
+    `;
+  }).join('');
+});
+
+
+// === COTE PAR DISCIPLINE (avec selecteur multi-annee) ===
+fetch('data/per_sport_predictions.json').then(r => r.json()).then(data => {
+  const select = document.getElementById('country-select');
+  const totalEl = document.getElementById('country-total');
+  const yearControlsEl = document.getElementById('year-controls');
+  const modeToggleEl = document.getElementById('mode-toggle');
+
+  // State global
+  const state = {
+    noc: 'USA',
+    mode: 'single',        // 'single' ou 'compare'
+    selectedYears: [2028], // tableau d'annees actives
+  };
+
+  // Populate dropdown pays
+  select.innerHTML = '<option value="">— Sélectionner un pays —</option>' +
+    data.map(d => `<option value="${d.NOC}">${d.Country}</option>`).join('');
+
+  // === Render year controls (depend du mode) ===
+  function renderYearControls() {
+    const country = data.find(d => d.NOC === state.noc);
+    if (!country) return;
+    const years = country.available_years;
+
+    yearControlsEl.innerHTML = years.map(y => {
+      const isPred = y === 2028;
+      const active = state.selectedYears.includes(y);
+      return `<button class="year-chip ${active ? 'active' : ''} ${isPred ? 'pred' : ''}" data-year="${y}">
+        ${y}${isPred ? ' (prédit)' : ''}
+      </button>`;
+    }).join('');
+
+    // Click handler sur chaque chip
+    yearControlsEl.querySelectorAll('.year-chip').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const y = parseInt(btn.dataset.year);
+        if (state.mode === 'single') {
+          state.selectedYears = [y];
+        } else {
+          // compare mode : toggle l'annee
+          const idx = state.selectedYears.indexOf(y);
+          if (idx === -1) {
+            if (state.selectedYears.length >= 4) {
+              alert('Maximum 4 années en mode comparaison');
+              return;
+            }
+            state.selectedYears.push(y);
+          } else {
+            if (state.selectedYears.length === 1) {
+              alert('Au moins une année doit être sélectionnée');
+              return;
+            }
+            state.selectedYears.splice(idx, 1);
+          }
+          state.selectedYears.sort();
+        }
+        renderYearControls();
+        renderPlot();
+      });
+    });
+  }
+
+  // === Mode toggle ===
+  modeToggleEl.querySelectorAll('.mode-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      state.mode = btn.dataset.mode;
+      // Update visuel des boutons
+      modeToggleEl.querySelectorAll('.mode-btn').forEach(b => {
+        if (b.dataset.mode === state.mode) {
+          b.style.background = 'var(--olympic-blue)';
+          b.style.color = 'white';
+          b.style.borderColor = 'var(--olympic-blue)';
+        } else {
+          b.style.background = 'white';
+          b.style.color = 'var(--ink)';
+          b.style.borderColor = 'rgba(0,0,0,0.12)';
+        }
+      });
+
+      // Reset selection selon le mode
+      if (state.mode === 'single') {
+        state.selectedYears = [state.selectedYears[state.selectedYears.length - 1] || 2028];
+      } else {
+        // Pre-cocher 2024 et 2028 par defaut
+        if (state.selectedYears.length < 2) {
+          state.selectedYears = [2024, 2028];
+        }
+      }
+      renderYearControls();
+      renderPlot();
+    });
+  });
+
+  // === Render le graph principal ===
+  function renderPlot() {
+    const country = data.find(d => d.NOC === state.noc);
+    if (!country) {
+      document.getElementById('plot-per-sport').innerHTML =
+        '<div class="text-center text-slate-400 py-32">Sélectionnez un pays pour voir sa cote.</div>';
+      totalEl.textContent = '—';
+      return;
+    }
+
+    const sports = country.sports_list;  // liste des 15 sports du pays
+    const years = state.selectedYears;
+
+    // Trier les sports par total decroissant (toutes annees confondues)
+    const sportTotals = sports.map(sport => {
+      let total = 0;
+      years.forEach(y => {
+        const records = country.by_year[String(y)] || [];
+        const r = records.find(rr => rr.Sport === sport);
+        if (r) total += r.Total;
+      });
+      return { sport, total };
+    });
+    sportTotals.sort((a, b) => a.total - b.total);  // ascending pour barh
+    const sortedSports = sportTotals.map(s => s.sport);
+
+    // Mise a jour du total
+    const grandTotal = sportTotals.reduce((s, x) => s + x.total, 0);
+    const yearsLabel = years.map(y => y === 2028 ? '2028 (prédit)' : y).join(' + ');
+    totalEl.textContent = `${country.Country} — ${yearsLabel} : ${grandTotal.toFixed(0)} médailles cumulées`;
+
+    // === Construction des traces ===
+    // Une trace par (annee, couleur) = 3 traces par annee (Or, Argent, Bronze)
+    // Empilage barmode='stack' avec offsetgroup par annee pour les avoir cote-a-cote
+    const traces = [];
+
+    years.forEach((year, yearIdx) => {
+      const records = country.by_year[String(year)] || [];
+      const yearLabel = year === 2028 ? `${year} (prédit)` : `${year}`;
+
+      // Pour chaque sport, recuperer la valeur
+      const recordsBysport = sortedSports.map(sport =>
+        records.find(r => r.Sport === sport) || { Sport: sport, Gold: 0, Silver: 0, Bronze: 0, Total: 0 }
+      );
+
+      // Or (groupe par annee pour cote-a-cote)
+      traces.push({
+        x: recordsBysport.map(r => r.Gold),
+        y: sortedSports,
+        type: 'bar',
+        orientation: 'h',
+        name: `Or ${yearLabel}`,
+        marker: { color: COLORS.gold, opacity: year === 2028 ? 1 : (0.5 + yearIdx * 0.15) },
+        offsetgroup: String(year),
+        legendgroup: String(year),
+        hovertemplate: `<b>%{y}</b><br>${yearLabel} -- Or : %{x:.1f}<extra></extra>`,
+        showlegend: yearIdx === 0,  // Une seule entree legende pour Or
+      });
+      traces.push({
+        x: recordsBysport.map(r => r.Silver),
+        y: sortedSports,
+        type: 'bar',
+        orientation: 'h',
+        name: `Argent ${yearLabel}`,
+        marker: { color: COLORS.silver, opacity: year === 2028 ? 1 : (0.5 + yearIdx * 0.15) },
+        offsetgroup: String(year),
+        legendgroup: String(year),
+        hovertemplate: `<b>%{y}</b><br>${yearLabel} -- Argent : %{x:.1f}<extra></extra>`,
+        showlegend: yearIdx === 0,
+      });
+      traces.push({
+        x: recordsBysport.map(r => r.Bronze),
+        y: sortedSports,
+        type: 'bar',
+        orientation: 'h',
+        name: `Bronze ${yearLabel}`,
+        marker: { color: COLORS.bronze, opacity: year === 2028 ? 1 : (0.5 + yearIdx * 0.15) },
+        offsetgroup: String(year),
+        legendgroup: String(year),
+        hovertemplate: `<b>%{y}</b><br>${yearLabel} -- Bronze : %{x:.1f}<extra></extra>`,
+        showlegend: yearIdx === 0,
+      });
+    });
+
+    // Build title
+    let title;
+    if (state.mode === 'single') {
+      title = `${country.Country} — Médailles ${yearsLabel}`;
+    } else {
+      title = `${country.Country} — Comparaison ${yearsLabel}`;
+    }
+
+    // === Plot ===
+    Plotly.newPlot('plot-per-sport', traces, {
+      ...PLOTLY_LAYOUT,
+      title: { ...PLOTLY_LAYOUT.title, text: title },
+      barmode: 'stack',         // Or/Argent/Bronze empiles dans la meme annee
+      bargroupgap: 0.15,        // espace entre les groupes d'annees
+      xaxis: { ...PLOTLY_LAYOUT.xaxis, title: 'Médailles' },
+      yaxis: { ...PLOTLY_LAYOUT.yaxis, title: '', automargin: true },
+      margin: { l: 200, r: 30, t: 70, b: 50 },
+      height: 700,
+    }, PLOTLY_CONFIG);
+  }
+
+  // === Init ===
+  select.value = 'USA';
+  state.noc = 'USA';
+  renderYearControls();
+  renderPlot();
+
+  select.addEventListener('change', e => {
+    state.noc = e.target.value;
+    renderYearControls();
+    renderPlot();
+  });
+});
+</script>
+
+</body>
+</html>
