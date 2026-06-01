@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <title>Prédictions LA 2028 — YPerf</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
@@ -10,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;700;800;900&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
   <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
-  <link rel="stylesheet" href="assets/css/app.css">
+  <link rel="stylesheet" href="assets/css/app.css?v=6">
   <link rel="icon" type="image/svg+xml" href="assets/img/olympic-rings.svg">
 </head>
 
@@ -119,25 +122,23 @@
     <!-- Pays (mode single : 1 pays) -->
     <div class="flex items-center gap-4 flex-wrap" id="single-country-row">
       <label for="country-select" class="text-sm font-semibold text-slate-700 w-24">Pays :</label>
-      <select id="country-select" class="country-select" style="min-width: 220px;">
+      <select id="country-select" class="country-select" style="min-width: 240px;">
         <option value="">Chargement...</option>
       </select>
       <span class="text-xs text-slate-500 ml-auto" id="country-total">—</span>
     </div>
 
-    <!-- Pays (mode compare : multi-pays via dropdown + tags) -->
+    <!-- Pays (mode compare : multi-select avec recherche) -->
     <div class="flex items-start gap-4 flex-wrap hidden" id="compare-country-row">
-      <label for="add-country-select" class="text-sm font-semibold text-slate-700 w-24 pt-2">Pays :</label>
-      <div class="flex-1">
-        <div class="flex items-center gap-3 flex-wrap mb-2">
-          <select id="add-country-select" class="country-select" style="min-width: 220px;">
-            <option value="">+ Ajouter un pays…</option>
-          </select>
-          <span class="text-xs text-slate-400" id="compare-hint">jusqu'à 6 pays</span>
+      <label class="text-sm font-semibold text-slate-700 w-24 pt-2">Pays :</label>
+      <div class="flex-1 min-w-0">
+        <!-- Boite multi-select : tags + champ de recherche, comme un vrai input a chips -->
+        <div id="ms-box" class="ms-box">
+          <div id="ms-tags" class="ms-tags"></div>
+          <input id="ms-input" class="ms-input" type="text" placeholder="Rechercher un pays…" autocomplete="off">
+          <div id="ms-dropdown" class="ms-dropdown hidden"></div>
         </div>
-        <div id="country-tags" class="flex flex-wrap gap-2">
-          <!-- Tags pays selectionnes (filled by JS) -->
-        </div>
+        <div class="text-xs text-slate-400 mt-1.5" id="ms-hint">Cliquez pour ajouter — jusqu'à 6 pays</div>
       </div>
     </div>
 
@@ -175,20 +176,6 @@
       background: var(--olympic-blue); color: white;
       border-color: var(--olympic-blue);
     }
-    .country-tag {
-      display: inline-flex; align-items: center; gap: 0.5rem;
-      padding: 0.4rem 0.5rem 0.4rem 0.9rem; border-radius: 100px;
-      background: var(--olympic-blue); color: white;
-      font-size: 0.85rem; font-weight: 500; font-family: inherit;
-    }
-    .country-tag button {
-      display: inline-flex; align-items: center; justify-content: center;
-      width: 18px; height: 18px; border-radius: 50%;
-      background: rgba(255,255,255,0.25); color: white; border: none;
-      cursor: pointer; font-size: 0.75rem; line-height: 1; padding: 0;
-      transition: background 0.15s;
-    }
-    .country-tag button:hover { background: rgba(255,255,255,0.5); }
     .year-chip.pred {
       border-style: dashed; border-color: var(--olympic-red);
       color: var(--olympic-red);
@@ -198,6 +185,47 @@
       border-color: var(--olympic-red);
     }
     .mode-btn { cursor: pointer; font-family: inherit; }
+
+    /* === Multi-select pays (boite tags + recherche + dropdown) === */
+    .ms-box {
+      position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem;
+      min-height: 48px; padding: 0.4rem 0.6rem;
+      border: 1px solid rgba(0,0,0,0.15); border-radius: 12px; background: white;
+      cursor: text; transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .ms-box.focused { border-color: var(--olympic-blue); box-shadow: 0 0 0 3px rgba(0,133,199,0.12); }
+    .ms-tags { display: contents; }
+    .ms-tag {
+      display: inline-flex; align-items: center; gap: 0.45rem;
+      padding: 0.3rem 0.4rem 0.3rem 0.75rem; border-radius: 100px;
+      background: var(--olympic-blue); color: white;
+      font-size: 0.82rem; font-weight: 600; white-space: nowrap;
+    }
+    .ms-tag button {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 17px; height: 17px; border-radius: 50%;
+      background: rgba(255,255,255,0.3); color: white; border: none;
+      cursor: pointer; font-size: 0.7rem; line-height: 1; padding: 0;
+    }
+    .ms-tag button:hover { background: rgba(255,255,255,0.6); }
+    .ms-input {
+      flex: 1; min-width: 120px; border: none; outline: none;
+      font-size: 0.9rem; font-family: inherit; background: transparent; padding: 0.3rem;
+    }
+    .ms-dropdown {
+      position: absolute; top: calc(100% + 4px); left: 0; right: 0; z-index: 40;
+      max-height: 260px; overflow-y: auto;
+      background: white; border: 1px solid rgba(0,0,0,0.12); border-radius: 12px;
+      box-shadow: 0 8px 28px rgba(0,0,0,0.14);
+    }
+    .ms-option {
+      padding: 0.6rem 0.9rem; cursor: pointer; font-size: 0.9rem;
+      display: flex; justify-content: space-between; align-items: center;
+      transition: background 0.1s;
+    }
+    .ms-option:hover, .ms-option.highlight { background: rgba(0,133,199,0.08); }
+    .ms-option .noc { font-size: 0.72rem; color: #94a3b8; font-family: 'JetBrains Mono', monospace; }
+    .ms-empty { padding: 0.8rem 0.9rem; color: #94a3b8; font-size: 0.85rem; }
   </style>
 
 </section>
@@ -373,63 +401,121 @@ fetch('data/per_sport_predictions.json').then(r => r.json()).then(data => {
   const yearControlsEl = document.getElementById('year-controls');
   const yearLabelEl = document.getElementById('year-label');
   const modeToggleEl = document.getElementById('mode-toggle');
-  const addCountrySelect = document.getElementById('add-country-select');
-  const countryTagsEl = document.getElementById('country-tags');
   const singleRow = document.getElementById('single-country-row');
   const compareRow = document.getElementById('compare-country-row');
+  // Multi-select compare
+  const msBox = document.getElementById('ms-box');
+  const msTags = document.getElementById('ms-tags');
+  const msInput = document.getElementById('ms-input');
+  const msDropdown = document.getElementById('ms-dropdown');
+  const msHint = document.getElementById('ms-hint');
+
+  const MAX_COMPARE = 6;
 
   // Annees disponibles, lues depuis les donnees (1952->2028)
   const ALL_YEARS = (data[0] ? data[0].available_years : []).map(Number);
 
-  // Pays tries par ordre alphabetique pour les selecteurs/chips
+  // Pays tries par ordre alphabetique
   const dataSorted = [...data].sort((a, b) => a.Country.localeCompare(b.Country, 'fr'));
 
   // State global
   const state = {
-    mode: 'single',          // 'single' ou 'compare'
-    noc: 'USA',              // pays selectionne (mode single)
-    selectedYear: 2028,      // annee active (les 2 modes)
-    compareNocs: ['USA', 'CHN', 'FRA'],  // pays compares (mode compare)
+    mode: 'single',
+    noc: 'USA',
+    selectedYear: 2028,
+    compareNocs: ['USA', 'CHN', 'FRA'],
   };
-
-  // Populate dropdown pays (mode single) -- ordre alphabetique
-  select.innerHTML = '<option value="">— Sélectionner un pays —</option>' +
-    dataSorted.map(d => `<option value="${d.NOC}">${d.Country}</option>`).join('');
 
   const nameOf = noc => (data.find(d => d.NOC === noc) || {}).Country || noc;
 
-  // === Mode compare : dropdown "ajouter" + tags des pays selectionnes ===
-  function renderCompareControls() {
-    // Dropdown : seulement les pays PAS encore selectionnes, ordre alpha
-    const available = dataSorted.filter(d => !state.compareNocs.includes(d.NOC));
-    const atMax = state.compareNocs.length >= 6;
-    addCountrySelect.innerHTML =
-      `<option value="">${atMax ? 'Maximum 6 pays atteint' : '+ Ajouter un pays…'}</option>` +
-      available.map(d => `<option value="${d.NOC}">${d.Country}</option>`).join('');
-    addCountrySelect.disabled = atMax;
+  // Dropdown pays (mode single) -- ordre alphabetique
+  select.innerHTML = '<option value="">— Sélectionner un pays —</option>' +
+    dataSorted.map(d => `<option value="${d.NOC}">${d.Country}</option>`).join('');
 
-    // Tags des pays choisis (dans l'ordre de selection), avec bouton supprimer
-    countryTagsEl.innerHTML = state.compareNocs.map(noc =>
-      `<span class="country-tag">${nameOf(noc)}<button data-noc="${noc}" title="Retirer" aria-label="Retirer ${nameOf(noc)}">✕</button></span>`
+  // ============================================================
+  // MULTI-SELECT : tags + champ de recherche filtrant + dropdown
+  // ============================================================
+  let msHighlight = 0;   // index de l'option surlignee au clavier
+
+  // Rend les tags des pays choisis
+  function renderTags() {
+    msTags.innerHTML = state.compareNocs.map(noc =>
+      `<span class="ms-tag">${nameOf(noc)}<button type="button" data-noc="${noc}" aria-label="Retirer ${nameOf(noc)}">✕</button></span>`
     ).join('');
-
-    countryTagsEl.querySelectorAll('button').forEach(btn => {
-      btn.addEventListener('click', () => {
-        if (state.compareNocs.length === 1) { alert('Au moins un pays doit être sélectionné'); return; }
+    msTags.querySelectorAll('button').forEach(btn => {
+      btn.addEventListener('mousedown', e => {  // mousedown : avant le blur de l'input
+        e.preventDefault();
+        if (state.compareNocs.length === 1) return;
         state.compareNocs = state.compareNocs.filter(n => n !== btn.dataset.noc);
-        renderCompareControls();
-        renderPlot();
+        renderTags(); renderDropdown(); renderPlot();
       });
     });
+    const atMax = state.compareNocs.length >= MAX_COMPARE;
+    msInput.style.display = atMax ? 'none' : '';
+    msHint.textContent = atMax
+      ? `Maximum ${MAX_COMPARE} pays atteint — retirez-en un pour en ajouter`
+      : `Cliquez pour ajouter — jusqu'à ${MAX_COMPARE} pays`;
   }
 
-  addCountrySelect.addEventListener('change', e => {
-    const noc = e.target.value;
-    if (!noc) return;
-    if (!state.compareNocs.includes(noc)) state.compareNocs.push(noc);
-    renderCompareControls();
-    renderPlot();
+  // Liste filtree selon la recherche, hors pays deja choisis
+  function filteredOptions() {
+    const q = msInput.value.trim().toLowerCase();
+    return dataSorted.filter(d =>
+      !state.compareNocs.includes(d.NOC) &&
+      (q === '' || d.Country.toLowerCase().includes(q) || d.NOC.toLowerCase().includes(q))
+    );
+  }
+
+  function renderDropdown() {
+    const opts = filteredOptions();
+    if (state.compareNocs.length >= MAX_COMPARE) { msDropdown.classList.add('hidden'); return; }
+    if (opts.length === 0) {
+      msDropdown.innerHTML = '<div class="ms-empty">Aucun pays trouvé</div>';
+    } else {
+      msHighlight = Math.min(msHighlight, opts.length - 1);
+      msDropdown.innerHTML = opts.map((d, i) =>
+        `<div class="ms-option ${i === msHighlight ? 'highlight' : ''}" data-noc="${d.NOC}">
+          <span>${d.Country}</span><span class="noc">${d.NOC}</span>
+        </div>`
+      ).join('');
+      msDropdown.querySelectorAll('.ms-option').forEach(opt => {
+        opt.addEventListener('mousedown', e => {  // mousedown : avant le blur
+          e.preventDefault();
+          addCountry(opt.dataset.noc);
+        });
+      });
+    }
+  }
+
+  function addCountry(noc) {
+    if (state.compareNocs.includes(noc)) return;
+    if (state.compareNocs.length >= MAX_COMPARE) return;
+    state.compareNocs.push(noc);
+    msInput.value = '';
+    msHighlight = 0;
+    renderTags(); renderDropdown(); renderPlot();
+    msInput.focus();
+  }
+
+  function openDropdown() { msBox.classList.add('focused'); renderDropdown(); msDropdown.classList.remove('hidden'); }
+  function closeDropdown() { msBox.classList.remove('focused'); msDropdown.classList.add('hidden'); }
+
+  // Clic dans la boite -> focus l'input
+  msBox.addEventListener('click', e => { if (e.target === msBox || e.target === msTags) msInput.focus(); });
+  msInput.addEventListener('focus', openDropdown);
+  msInput.addEventListener('blur', closeDropdown);
+  msInput.addEventListener('input', () => { msHighlight = 0; renderDropdown(); });
+  msInput.addEventListener('keydown', e => {
+    const opts = filteredOptions();
+    if (e.key === 'ArrowDown') { e.preventDefault(); msHighlight = Math.min(msHighlight + 1, opts.length - 1); renderDropdown(); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); msHighlight = Math.max(msHighlight - 1, 0); renderDropdown(); }
+    else if (e.key === 'Enter') { e.preventDefault(); if (opts[msHighlight]) addCountry(opts[msHighlight].NOC); }
+    else if (e.key === 'Backspace' && msInput.value === '' && state.compareNocs.length > 1) {
+      state.compareNocs.pop(); renderTags(); renderDropdown(); renderPlot();
+    }
   });
+
+  function renderCompareControls() { renderTags(); renderDropdown(); }
 
   // === Render year controls (1 seule annee active dans les 2 modes) ===
   function renderYearControls() {
