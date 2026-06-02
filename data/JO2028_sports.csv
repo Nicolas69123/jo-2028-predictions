@@ -1,0 +1,355 @@
+discipline;event;event_gender
+3x3 Basketball;Men;Male
+3x3 Basketball;Women;Female
+Archery;Men Individual;Male
+Archery;Women Individual;Female
+Archery;Mixed Team;Mixed
+Archery;Men Team;Male
+Archery;Women Team;Female
+Archery;Compound Mixed Team;Mixed
+Artistic Gymnastics;Men Team;Male
+Artistic Gymnastics;Men All Around;Male
+Artistic Gymnastics;Men Floor Exercise;Male
+Artistic Gymnastics;Men Pommel Horse;Male
+Artistic Gymnastics;Men Rings;Male
+Artistic Gymnastics;Men Vault;Male
+Artistic Gymnastics;Men Parallel Bars;Male
+Artistic Gymnastics;Men Horizontal Bar;Male
+Artistic Gymnastics;Women Team;Female
+Artistic Gymnastics;Women All Around;Female
+Artistic Gymnastics;Women Vault;Female
+Artistic Gymnastics;Women Uneven Bars;Female
+Artistic Gymnastics;Women Balance Beam;Female
+Artistic Gymnastics;Women Floor Exercise;Female
+Artistic Gymnastics;Mixed Team;Mixed
+Artistic Swimming;Team;Female
+Artistic Swimming;Duet;Female
+Athletics;Men 100M;Male
+Athletics;Men 200M;Male
+Athletics;Men 400M;Male
+Athletics;Men 800M;Male
+Athletics;Men 1500M;Male
+Athletics;Men 5000M;Male
+Athletics;Men 10,000M;Male
+Athletics;Women 100M;Female
+Athletics;Women 200M;Female
+Athletics;Women 400M;Female
+Athletics;Women 800M;Female
+Athletics;Women 1500M;Female
+Athletics;Women 5000M;Female
+Athletics;Women 10,000M;Female
+Athletics;Men 110M Hurdles;Male
+Athletics;Women 100M Hurdles;Female
+Athletics;Men 400M Hurdles;Male
+Athletics;Women 400M Hurdles;Female
+Athletics;Men 3000M Steeplechase;Male
+Athletics;Women 3000M Steeplechase;Female
+Athletics;Men 4X400M Relay;Male
+Athletics;Women 4X400M Relay;Female
+Athletics;Men 4X100M Relay;Male
+Athletics;Women 4X100M Relay;Female
+Athletics;Men High Jump;Male
+Athletics;Women High Jump;Female
+Athletics;Women Pole Vault;Female
+Athletics;Men Pole Vault;Male
+Athletics;Men Long Jump;Male
+Athletics;Women Long Jump;Female
+Athletics;Men Triple Jump;Male
+Athletics;Women Triple Jump;Female
+Athletics;Men Shot Put;Male
+Athletics;Women Shot Put;Female
+Athletics;Men Discus Throw;Male
+Athletics;Women Discus Throw;Female
+Athletics;Men Hammer Throw;Male
+Athletics;Women Hammer Throw;Female
+Athletics;Women Javelin Throw;Female
+Athletics;Men Javelin Throw;Male
+Athletics;Women Heptathlon;Female
+Athletics;Men Decathlon;Male
+Athletics;Women 20Km Race Walk;Female
+Athletics;Men 20Km Race Walk;Male
+Athletics;Women Marathon;Female
+Athletics;Men Marathon;Male
+Athletics;Mixed 4 X 100M Relay;Mixed
+Athletics;Mixed 4 X 400M Relay;Mixed
+Badminton;Men Doubles;Male
+Badminton;Men Singles;Male
+Badminton;Mixed Doubles;Mixed
+Badminton;Women Doubles;Female
+Badminton;Women Singles;Female
+Baseball;Men Baseball;Male
+Basketball;Men Basketball;Male
+Basketball;Women Basketball;Female
+Beach Volleyball;Men Beach Volleyball;Male
+Beach Volleyball;Women Beach Volleyball;Female
+Cycling BMX Freestyle;Men Park;Male
+Cycling BMX Freestyle;Women Park;Female
+Cycling BMX Racing;Men;Male
+Cycling BMX Racing;Women;Female
+Boxing;Men 55Kg;Male
+Boxing;Men 60Kg;Male
+Boxing;Men 65Kg;Male
+Boxing;Men 70Kg;Male
+Boxing;Men 80Kg;Male
+Boxing;Men 90Kg;Male
+Boxing;Men +90Kg;Male
+Boxing;Women 51Kg;Female
+Boxing;Women 54Kg;Female
+Boxing;Women 57Kg;Female
+Boxing;Women 60Kg;Female
+Boxing;Women 65Kg;Female
+Boxing;Women 70Kg;Female
+Boxing;Women 75Kg;Female
+Canoe Slalom;Men Canoe Single;Male
+Canoe Slalom;Men Kayak;Male
+Canoe Slalom;Men Kayak Cross;Male
+Canoe Slalom;Women Canoe Single;Female
+Canoe Slalom;Women Kayak;Female
+Canoe Slalom;Women Kayak Cross;Female
+Canoe Sprint;Men Kayak Single 1000M;Male
+Canoe Sprint;Men Kayak Double 500M;Male
+Canoe Sprint;Men Kayak Four 500M;Male
+Canoe Sprint;Men Canoe Single 1000M;Male
+Canoe Sprint;Men Canoe Double 500M;Male
+Canoe Sprint;Women Kayak Single 500M;Female
+Canoe Sprint;Women Kayak Double 500M;Female
+Canoe Sprint;Women Kayak Four 500M;Female
+Canoe Sprint;Women Canoe Single 200M;Female
+Canoe Sprint;Women Canoe Double 500M;Female
+Sport Climbing;Men Boulder & Lead;Male
+Sport Climbing;Men Combined;Male
+Sport Climbing;Men Speed;Male
+Sport Climbing;Women Boulder & Lead;Female
+Sport Climbing;Women Combined;Female
+Sport Climbing;Women Speed;Female
+Cricket;Men Cricket;Male
+Cricket;Women Cricket;Female
+Cycling Road;Men Individual Time Trial;Male
+Cycling Road;Men Road Race;Male
+Cycling Road;Women Individual Time Trial;Female
+Cycling Road;Women Road Race;Female
+Cycling Track;Men Sprint;Male
+Cycling Track;Men Sprint Individual;Male
+Cycling Track;Men Keirin;Male
+Cycling Track;Men Team Pursuit;Male
+Cycling Track;Men Omnium;Male
+Cycling Track;Men Madison;Male
+Cycling Track;Women Sprint;Female
+Cycling Track;Women Sprint Individual;Female
+Cycling Track;Women Keirin;Female
+Cycling Track;Women Team Pursuit;Female
+Cycling Track;Women Omnium;Female
+Cycling Track;Women Madison;Female
+Cycling Track;Women 10,000M;Female
+Diving;Men 10M Platform;Male
+Diving;Men 3M Springboard;Male
+Diving;Men Synchronised 10M Platform;Male
+Diving;Men Synchronised 3M Springboard;Male
+Diving;Women 10M Platform;Female
+Diving;Women 3M Springboard;Female
+Diving;Women Synchronised 10M Platform;Female
+Diving;Women Synchronised 3M Springboard;Female
+Equestrian;Dressage Individual;Undefined
+Equestrian;Dressage Team;Undefined
+Equestrian;Eventing Individual;Undefined
+Equestrian;Eventing Team;Undefined
+Equestrian;Jumping Individual;Undefined
+Equestrian;Jumping Team;Undefined
+Fencing;Men Pe Individual;Male
+Fencing;Men Foil Individual;Male
+Fencing;Men Sabre Individual;Male
+Fencing;Men Pe Team;Male
+Fencing;Men Foil Team;Male
+Fencing;Men Sabre Team;Male
+Fencing;Women Pe Individual;Female
+Fencing;Women Foil Individual;Female
+Fencing;Women Sabre Individual;Female
+Fencing;Women Pe Team;Female
+Fencing;Women Foil Team;Female
+Fencing;Women Sabre Team;Female
+Flag Football;Men;Male
+Flag Football;Women;Female
+Football;Men;Male
+Football;Women;Female
+Golf;Men Individual Stroke Play;Male
+Golf;Women Individual Stroke Play;Female
+Golf;Mixed Team;Mixed
+Handball;Men;Male
+Handball;Women;Female
+Hockey;Men;Male
+Hockey;Women;Female
+Judo;Men 60Kg;Male
+Judo;Men 66Kg;Male
+Judo;Men 73Kg;Male
+Judo;Men 81Kg;Male
+Judo;Men 90Kg;Male
+Judo;Men 100Kg;Male
+Judo;Men +100Kg;Male
+Judo;Women 48Kg;Female
+Judo;Women 52Kg;Female
+Judo;Women 57Kg;Female
+Judo;Women 63Kg;Female
+Judo;Women 70Kg;Female
+Judo;Women 78Kg;Female
+Judo;Women +78Kg;Female
+Judo;Mixed Team;Mixed
+Lacrosse;Men Lacrosse;Male
+Lacrosse;Women Lacrosse;Female
+Modern Pentathlon;Men Individual;Male
+Modern Pentathlon;Women Individual;Female
+Cycling Mountain Bike;Women Cross Country;Female
+Cycling Mountain Bike;Men Cross Country;Male
+Marathon Swimming;Men 10Km;Male
+Marathon Swimming;Women 10Km;Female
+Rhythmic Gymnastics;Individual All Around;Female
+Rhythmic Gymnastics;Group All Around;Female
+Rowing;Men Single Sculls;Male
+Rowing;Women Single Sculls;Female
+Rowing;Men Pair;Male
+Rowing;Women Pair;Female
+Rowing;Men Double Sculls;Male
+Rowing;Women Double Sculls;Female
+Rowing;Men Four;Male
+Rowing;Women Four;Female
+Rowing;Men Quadruple Sculls;Male
+Rowing;Women Quadruple Sculls;Female
+Rowing;Men Eight;Male
+Rowing;Women Eight;Female
+Rowing Coastal Beach Sprint;Men Single Sculls;Male
+Rowing Coastal Beach Sprint;Women Single Sculls;Female
+Rowing Coastal Beach Sprint;Mixed Double Sculls;Mixed
+Rugby Sevens;Men;Male
+Rugby Sevens;Women;Female
+Sailing;Men Windsurfing;Male
+Sailing;Men Dinghy;Male
+Sailing;Men Skiff;Male
+Sailing;Men Kite;Male
+Sailing;Women Windsurfing;Female
+Sailing;Women Dinghy;Female
+Sailing;Women Skiff;Female
+Sailing;Women Kite;Female
+Sailing;Mixed Multihull;Mixed
+Sailing;Mixed Dinghy;Mixed
+Shooting;Men 10M Air Rifle;Male
+Shooting;Men 50M Rifle 3 Positions;Male
+Shooting;Men 10M Air Pistol;Male
+Shooting;Men 25M Rapid Fire Pistol;Male
+Shooting;Men Trap;Male
+Shooting;Men Skeet;Male
+Shooting;Women 10M Air Rifle;Female
+Shooting;Women 50M Rifle 3 Positions;Female
+Shooting;Women 10M Air Pistol;Female
+Shooting;Women 25M Rapid Fire Pistol;Female
+Shooting;Women Trap;Female
+Shooting;Women Skeet;Female
+Shooting;Mixed 10M Air Pistol Team;Mixed
+Shooting;Mixed 10M Air Rifle Team;Mixed
+Shooting;Mixed Trap Team;Mixed
+Skateboarding;Men Park;Male
+Skateboarding;Men Street;Male
+Skateboarding;Women Park;Female
+Skateboarding;Women Street;Female
+Softball;Women Softball;Female
+Squash;Men;Male
+Squash;Women;Female
+Surfing;Men;Male
+Surfing;Women;Female
+Swimming;Men 50M Freestyle;Male
+Swimming;Men 100M Freestyle;Male
+Swimming;Men 200M Freestyle;Male
+Swimming;Men 400M Freestyle;Male
+Swimming;Men 800M Freestyle;Male
+Swimming;Men 1500M Freestyle;Male
+Swimming;Men 50M Breaststroke;Male
+Swimming;Men 100M Breaststroke;Male
+Swimming;Men 200M Breaststroke;Male
+Swimming;Men 50M Backstroke;Male
+Swimming;Men 100M Backstroke;Male
+Swimming;Men 200M Backstroke;Male
+Swimming;Men 50M Butterfly;Male
+Swimming;Men 100M Butterfly;Male
+Swimming;Men 200M Butterfly;Male
+Swimming;Men 200M Individual Medley;Male
+Swimming;Men 400M Individual Medley;Male
+Swimming;Men 4 X 100M Freestyle Relay;Male
+Swimming;Men 4 X 200M Freestyle Relay;Male
+Swimming;Men 4 X 100M Medley Relay;Male
+Swimming;Women 50M Freestyle;Female
+Swimming;Women 100M Freestyle;Female
+Swimming;Women 200M Freestyle;Female
+Swimming;Women 400M Freestyle;Female
+Swimming;Women 800M Freestyle;Female
+Swimming;Women 1500M Freestyle;Female
+Swimming;Women 50M Breaststroke;Female
+Swimming;Women 100M Breaststroke;Female
+Swimming;Women 200M Breaststroke;Female
+Swimming;Women 50M Backstroke;Female
+Swimming;Women 100M Backstroke;Female
+Swimming;Women 200M Backstroke;Female
+Swimming;Women 50M Butterfly;Female
+Swimming;Women 100M Butterfly;Female
+Swimming;Women 200M Butterfly;Female
+Swimming;Women 200M Individual Medley;Female
+Swimming;Women 400M Individual Medley;Female
+Swimming;Women 4 X 100M Freestyle Relay;Female
+Swimming;Women 4 X 200M Freestyle Relay;Female
+Swimming;Women 4 X 100M Medley Relay;Female
+Swimming;Mixed 4 X 100M Medley Relay;Mixed
+Table Tennis;Men Doubles;Male
+Table Tennis;Men Singles;Male
+Table Tennis;Mixed Doubles;Mixed
+Table Tennis;Women Doubles;Female
+Table Tennis;Women Singles;Female
+Table Tennis;Mixed Team;Mixed
+Taekwondo;Men 58Kg;Male
+Taekwondo;Men 68Kg;Male
+Taekwondo;Men 80Kg;Male
+Taekwondo;Men +80Kg;Male
+Taekwondo;Women 49Kg;Female
+Taekwondo;Women 57Kg;Female
+Taekwondo;Women 67Kg;Female
+Taekwondo;Women +67Kg;Female
+Tennis;Men Doubles;Male
+Tennis;Men Singles;Male
+Tennis;Women Doubles;Female
+Tennis;Women Singles;Female
+Tennis;Mixed Event;Mixed
+Trampoline Gymnastics;Men;Male
+Trampoline Gymnastics;Women;Female
+Triathlon;Men Individual;Male
+Triathlon;Mixed Relay;Mixed
+Triathlon;Women Individual;Female
+Volleyball;Men Volleyball;Male
+Volleyball;Women Volleyball;Female
+Water Polo;Women;Female
+Water Polo;Men;Male
+Weightlifting;Men 65Kg;Male
+Weightlifting;Men 75Kg;Male
+Weightlifting;Men 85Kg;Male
+Weightlifting;Men 95Kg;Male
+Weightlifting;Men 110Kg;Male
+Weightlifting;Men +110Kg;Male
+Weightlifting;Women 53Kg;Female
+Weightlifting;Women 61Kg;Female
+Weightlifting;Women 69Kg;Female
+Weightlifting;Women 77Kg;Female
+Weightlifting;Women 86Kg;Female
+Weightlifting;Women +86Kg;Female
+Wrestling;Men Greco Roman 60Kg;Male
+Wrestling;Men Greco Roman 67Kg;Male
+Wrestling;Men Greco Roman 77Kg;Male
+Wrestling;Men Greco Roman 87Kg;Male
+Wrestling;Men Greco Roman 97Kg;Male
+Wrestling;Men Greco Roman 130Kg;Male
+Wrestling;Men Freestyle 57Kg;Male
+Wrestling;Men Freestyle 65Kg;Male
+Wrestling;Men Freestyle 74Kg;Male
+Wrestling;Men Freestyle 86Kg;Male
+Wrestling;Men Freestyle 97Kg;Male
+Wrestling;Men Freestyle 125Kg;Male
+Wrestling;Women Freestyle 50Kg;Female
+Wrestling;Women Freestyle 53Kg;Female
+Wrestling;Women Freestyle 57Kg;Female
+Wrestling;Women Freestyle 62Kg;Female
+Wrestling;Women Freestyle 68Kg;Female
+Wrestling;Women Freestyle 76Kg;Female
