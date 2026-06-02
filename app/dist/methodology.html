@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Méthodologie — YPerf</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;700;800;900&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/app.css">
+  <link rel="icon" type="image/svg+xml" href="assets/img/olympic-rings.svg">
+</head>
+
+<body>
+
+<nav class="app-nav">
+  <div class="max-w-7xl mx-auto flex items-center justify-between">
+    <a href="index.html" class="brand">
+      <img src="assets/img/olympic-rings.svg" alt="" class="rings-tiny" style="filter:brightness(0) invert(1);">
+      <span>YPerf</span>
+    </a>
+    <div class="flex items-center gap-3 sm:gap-6 md:gap-8 text-xs sm:text-sm">
+      <a href="index.html" class="whitespace-nowrap">Accueil</a>
+      <a href="predict.html" class="whitespace-nowrap">Prédictions<span class="hidden md:inline"> LA 2028</span></a>
+      <a href="methodology.html" class="text-white whitespace-nowrap">Méthodologie</a>
+    </div>
+  </div>
+</nav>
+
+
+<section class="section pt-32">
+  <div class="max-w-3xl mx-auto">
+    <div class="eyebrow">Sous le capot</div>
+    <h1 class="font-serif font-black text-5xl md:text-6xl mb-6">Méthodologie</h1>
+    <p class="text-xl text-slate-600 leading-relaxed mb-8">
+      Le projet est entièrement reproductible. Toutes les sources sont ouvertes,
+      le code est public, et la pipeline tient en 3 notebooks Python.
+    </p>
+
+    <p class="pull-quote">
+      L'objectif n'est pas de prédire l'avenir. C'est de démontrer une démarche scientifique
+      capable de transformer 128 ans de données brutes en projections justifiables pour LA 2028.
+    </p>
+
+
+    <h2 class="font-serif font-black text-3xl md:text-4xl mt-16 mb-6">Pipeline en trois étapes</h2>
+
+    <div class="grid grid-cols-1 gap-6 my-8">
+      <div class="bg-white rounded-2xl p-8 border border-slate-200">
+        <div class="text-xs font-bold tracking-widest uppercase mb-2" style="color: var(--olympic-blue);">Étape 01 — Acquisition</div>
+        <h3 class="font-serif font-bold text-2xl mb-3">Deux sources versionnées</h3>
+        <p class="text-slate-600 leading-relaxed mb-4">
+          <code class="bg-slate-100 px-2 py-0.5 rounded text-xs">JO_resultats.csv</code> : résultats
+          olympiques 1896→2024 (incluant Paris 2024), validés contre les chiffres officiels du CIO.
+          <code class="bg-slate-100 px-2 py-0.5 rounded text-xs">JO2028_sports.csv</code> : programme
+          officiel des disciplines de Los Angeles 2028.
+        </p>
+        <ul class="text-sm text-slate-500 space-y-1 list-disc list-inside">
+          <li>24 000 résultats individuels</li>
+          <li>160 pays (NOC)</li>
+          <li>1896 → 2024 + programme 2028</li>
+        </ul>
+      </div>
+
+      <div class="bg-white rounded-2xl p-8 border border-slate-200">
+        <div class="text-xs font-bold tracking-widest uppercase mb-2" style="color: var(--olympic-yellow);">Étape 02 — Préparation</div>
+        <h3 class="font-serif font-bold text-2xl mb-3">Un fichier unique, propre</h3>
+        <p class="text-slate-600 leading-relaxed mb-4">
+          Filtrage des JO d'été, déduplication, agrégation au niveau (pays × année × sport).
+          Enrichissement avec la population (Banque Mondiale) et le continent.
+        </p>
+        <ul class="text-sm text-slate-500 space-y-1 list-disc list-inside">
+          <li><code class="bg-slate-100 px-2 py-0.5 rounded text-xs">medals_per_country_sport.csv</code> — 6 849 lignes</li>
+          <li>30 éditions × 158 pays × 70 sports</li>
+          <li>Colonnes : Year, NOC, Country, Sport, Gold, Silver, Bronze, Total, Population, Continent</li>
+        </ul>
+      </div>
+
+      <div class="bg-white rounded-2xl p-8 border border-slate-200">
+        <div class="text-xs font-bold tracking-widest uppercase mb-2" style="color: var(--olympic-red);">Étape 03 — Modélisation</div>
+        <h3 class="font-serif font-bold text-2xl mb-3">3 modèles Ridge indépendants</h3>
+        <p class="text-slate-600 leading-relaxed mb-4">
+          Un modèle par couleur de médaille (Or, Argent, Bronze). Split temporel strict
+          pour éviter le data leakage. GridSearchCV sur le paramètre de régularisation.
+        </p>
+        <ul class="text-sm text-slate-500 space-y-1 list-disc list-inside">
+          <li>Features : <code class="bg-slate-100 px-2 py-0.5 rounded text-xs">lag_1, lag_2, rolling_3, is_host, log_population, Continent, Sport</code></li>
+          <li>Train : 1968-2016 (13 éditions)</li>
+          <li>Test : Paris 2024</li>
+          <li>R² au niveau pays : <strong>0.87</strong></li>
+        </ul>
+      </div>
+    </div>
+
+
+    <h2 class="font-serif font-black text-3xl md:text-4xl mt-16 mb-6">Choix méthodologiques clés</h2>
+
+    <div class="space-y-6 text-slate-700">
+      <div>
+        <h3 class="font-serif font-bold text-xl mb-2">Pourquoi un split temporel et pas aléatoire ?</h3>
+        <p class="leading-relaxed">
+          Un <code class="bg-slate-100 px-2 py-0.5 rounded text-sm">train_test_split</code> aléatoire mélange les années, donc le modèle
+          "voit" partiellement le futur à l'entraînement — c'est le piège classique du <strong>data leakage</strong>.
+          On utilise un split strict par année : train sur 1968-2016, test sur Paris 2024.
+        </p>
+      </div>
+
+      <div>
+        <h3 class="font-serif font-bold text-xl mb-2">Pourquoi 3 modèles séparés (Or, Argent, Bronze) ?</h3>
+        <p class="leading-relaxed">
+          Le brief demande de prédire <strong>par type de médaille</strong>. Trois modèles indépendants
+          offrent une interprétabilité claire : on peut expliquer chaque prédiction d'Or séparément.
+          La somme des 3 donne le total au niveau pays.
+        </p>
+      </div>
+
+      <div>
+        <h3 class="font-serif font-bold text-xl mb-2">Pourquoi le tri par Or et pas par Total ?</h3>
+        <p class="leading-relaxed">
+          C'est le <strong>classement officiel du CIO</strong> : on trie par nombre d'Or, puis Argent en cas d'égalité,
+          puis Bronze. Le total n'est qu'indicatif. Notre tableau respecte cette convention.
+        </p>
+      </div>
+
+      <div>
+        <h3 class="font-serif font-bold text-xl mb-2">Pourquoi Ridge et pas Random Forest ou XGBoost ?</h3>
+        <p class="leading-relaxed">
+          On a comparé les 3. <strong>Ridge gagne</strong> car avec seulement 13 années d'entraînement,
+          les modèles complexes overfittent les patterns historiques au lieu de généraliser.
+          C'est un cas d'école du <strong>bias-variance tradeoff</strong> : moins de données, modèle plus simple.
+        </p>
+      </div>
+    </div>
+
+
+    <h2 class="font-serif font-black text-3xl md:text-4xl mt-16 mb-6">Limites assumées</h2>
+
+    <div class="bg-amber-50 border-l-4 border-amber-500 p-5 rounded-r-xl text-slate-700 mb-4">
+      <strong>Nouveaux sports 2028 absents.</strong> En croisant le programme officiel
+      (<code class="bg-white px-2 py-0.5 rounded text-sm">JO2028_sports.csv</code>) avec l'historique,
+      on identifie automatiquement les disciplines sans passé olympique : flag football, squash et
+      le rowing coastal beach sprint. Le modèle ne peut pas les prédire faute d'historique.
+    </div>
+
+    <div class="bg-amber-50 border-l-4 border-amber-500 p-5 rounded-r-xl text-slate-700 mb-4">
+      <strong>Effet pays hôte modélisé simplement.</strong> Une variable binaire <code class="bg-white px-2 py-0.5 rounded text-sm">is_host</code>
+      capture le boost moyen historique, sans distinguer l'amplitude (Chine 2008 ≠ Brésil 2016).
+    </div>
+
+    <div class="bg-amber-50 border-l-4 border-amber-500 p-5 rounded-r-xl text-slate-700 mb-4">
+      <strong>Pas de modélisation de l'incertitude.</strong> Les prédictions sont des nombres exacts.
+      Pour donner des intervalles de confiance, il faudrait passer à un modèle bayésien.
+    </div>
+
+
+    <h2 class="font-serif font-black text-3xl md:text-4xl mt-16 mb-6">Stack technique</h2>
+
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 my-8">
+      <div class="bg-white rounded-xl p-5 border border-slate-200 text-center">
+        <div class="text-xs font-bold uppercase tracking-widest mb-2" style="color: var(--olympic-blue);">Données</div>
+        <div class="font-serif font-bold text-lg">pandas</div>
+        <div class="text-xs text-slate-500">+ numpy</div>
+      </div>
+      <div class="bg-white rounded-xl p-5 border border-slate-200 text-center">
+        <div class="text-xs font-bold uppercase tracking-widest mb-2" style="color: var(--olympic-yellow);">ML</div>
+        <div class="font-serif font-bold text-lg">scikit-learn</div>
+        <div class="text-xs text-slate-500">Ridge + GridSearch</div>
+      </div>
+      <div class="bg-white rounded-xl p-5 border border-slate-200 text-center">
+        <div class="text-xs font-bold uppercase tracking-widest mb-2" style="color: var(--olympic-green);">Visualisation</div>
+        <div class="font-serif font-bold text-lg">Plotly.js</div>
+        <div class="text-xs text-slate-500">Graphes interactifs</div>
+      </div>
+      <div class="bg-white rounded-xl p-5 border border-slate-200 text-center">
+        <div class="text-xs font-bold uppercase tracking-widest mb-2" style="color: var(--olympic-red);">Interface</div>
+        <div class="font-serif font-bold text-lg">HTML + Tailwind</div>
+        <div class="text-xs text-slate-500">Statique, déployable</div>
+      </div>
+    </div>
+
+
+    <div class="text-center mt-16">
+      <a href="https://github.com/Nicolas69123/jo-2028-predictions" target="_blank" class="btn-primary">Voir le code sur GitHub</a>
+    </div>
+
+  </div>
+</section>
+
+
+<footer class="footer">
+  <img src="assets/img/olympic-rings.svg" alt="" class="rings-tiny mx-auto mb-3" style="filter:brightness(0) invert(1); opacity:0.7;">
+  <div class="font-serif font-bold text-2xl text-white mb-2">YPerf</div>
+  <p>Projet Bachelor 3 YNOV — UF SPÉ Data & IA — 2026</p>
+</footer>
+
+</body>
+</html>

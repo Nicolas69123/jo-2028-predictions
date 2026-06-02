@@ -1,0 +1,253 @@
+/* ============================================
+   YPerf -- Charte JO + design editorial minimaliste
+   ============================================ */
+
+:root {
+  --olympic-blue: #0085C7;
+  --olympic-yellow: #F4C300;
+  --olympic-black: #000000;
+  --olympic-green: #009F3D;
+  --olympic-red: #DF0024;
+  --olympic-blue-dark: #006699;
+  --olympic-gold: #D4AF37;
+  --ink: #0a0e1a;
+  --ink-darker: #050810;
+  --paper: #fafafa;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-feature-settings: "ss01", "cv01";
+  -webkit-font-smoothing: antialiased;
+  color: var(--ink);
+  background: var(--paper);
+}
+
+.font-serif { font-family: 'Playfair Display', Georgia, serif; }
+.font-mono { font-family: 'JetBrains Mono', monospace; }
+
+/* === Navbar === */
+.app-nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+  backdrop-filter: blur(16px);
+  background: rgba(10, 14, 26, 0.85);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  padding: 1rem 0.9rem;
+}
+@media (min-width: 768px) {
+  .app-nav { padding: 1rem 2rem; }
+}
+.app-nav a { color: rgba(255,255,255,0.85); text-decoration: none; transition: color 0.15s; }
+.app-nav a:hover { color: white; }
+.app-nav .brand {
+  font-family: 'Playfair Display', serif; font-weight: 900; font-size: 1.4rem;
+  color: white; letter-spacing: -0.025em;
+  display: inline-flex; align-items: center; gap: 0.75rem;
+}
+
+/* === Logo anneaux === */
+.rings-tiny { height: 22px; vertical-align: middle; }
+.rings-medium { height: 50px; }
+.rings-large { height: 75px; }
+
+/* === Hero immersive === */
+.hero {
+  position: relative; min-height: 100vh;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden; color: white;
+}
+.hero-bg {
+  position: absolute; inset: 0;
+  background-size: cover; background-position: center;
+  background-image: linear-gradient(180deg, rgba(10,14,26,0.55) 0%, rgba(10,14,26,0.96) 100%),
+                    url('../img/hero.jpg');
+  transform: scale(1.02);
+  animation: zoom 30s ease-in-out infinite alternate;
+}
+@keyframes zoom { from { transform: scale(1.02); } to { transform: scale(1.08); } }
+.hero-content {
+  position: relative; text-align: center; max-width: 1000px;
+  padding: 2rem; animation: fadeUp 1.2s ease-out;
+}
+@keyframes fadeUp { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
+
+.chip {
+  display: inline-block; padding: 0.5rem 1.3rem;
+  border: 1px solid rgba(255,255,255,0.3);
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(8px);
+  border-radius: 100px;
+  font-size: 0.78rem; font-weight: 600;
+  letter-spacing: 0.3em; text-transform: uppercase;
+  margin: 1.5rem 0;
+}
+
+.text-rainbow {
+  background: linear-gradient(135deg, #F4C300 0%, #DF0024 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* === Buttons === */
+.btn-primary, .btn-secondary {
+  display: inline-block; padding: 1rem 2.4rem;
+  font-weight: 600; font-size: 0.95rem;
+  letter-spacing: 0.02em; border-radius: 100px;
+  text-decoration: none; transition: all 0.25s ease;
+}
+.btn-primary {
+  background: var(--olympic-blue);
+  color: white !important;
+  box-shadow: 0 8px 24px rgba(0,133,199,0.35);
+}
+.btn-primary:hover {
+  background: var(--olympic-blue-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 14px 36px rgba(0,133,199,0.5);
+}
+.btn-secondary {
+  background: rgba(255,255,255,0.08);
+  color: white !important;
+  border: 1px solid rgba(255,255,255,0.3);
+  backdrop-filter: blur(8px);
+}
+.btn-secondary:hover {
+  background: rgba(255,255,255,0.18);
+  transform: translateY(-2px);
+}
+
+/* === Scroll indicator === */
+.scroll-arrow {
+  position: absolute; bottom: 2.5rem; left: 50%;
+  transform: translateX(-50%);
+  color: rgba(255,255,255,0.65);
+  font-size: 0.7rem; letter-spacing: 0.3em; text-transform: uppercase;
+  animation: bounce 2s ease-in-out infinite;
+}
+@keyframes bounce {
+  0%, 100% { transform: translateX(-50%) translateY(0); opacity: 0.65; }
+  50% { transform: translateX(-50%) translateY(8px); opacity: 1; }
+}
+
+/* === KPIs === */
+.kpi-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem; margin: 2rem 0;
+}
+.kpi-card {
+  background: white; border-radius: 18px; padding: 2.2rem 1.5rem;
+  text-align: center; border: 1px solid rgba(0,0,0,0.06);
+  position: relative; overflow: hidden;
+  transition: all 0.3s ease;
+}
+.kpi-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, #0085C7 0%, #F4C300 25%, #000 50%, #009F3D 75%, #DF0024 100%);
+  opacity: 0; transition: opacity 0.3s;
+}
+.kpi-card:hover { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(0,0,0,0.07); }
+.kpi-card:hover::before { opacity: 1; }
+.kpi-value {
+  font-family: 'Playfair Display', serif; font-size: 3rem;
+  font-weight: 900; line-height: 1; margin-bottom: 0.5rem;
+}
+.kpi-label {
+  font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.15em;
+  color: rgba(0,0,0,0.55); font-weight: 600;
+}
+
+/* Couleurs KPI (anneaux) */
+.kpi-card:nth-child(1) .kpi-value { color: var(--olympic-blue); }
+.kpi-card:nth-child(2) .kpi-value { color: var(--olympic-yellow); }
+.kpi-card:nth-child(3) .kpi-value { color: var(--olympic-green); }
+.kpi-card:nth-child(4) .kpi-value { color: var(--olympic-red); }
+
+/* === Plot containers === */
+.plot-container {
+  background: white; border-radius: 18px;
+  padding: 1.5rem; margin: 2rem 0;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.04);
+  border: 1px solid rgba(0,0,0,0.04);
+}
+
+/* === Section bands === */
+.section {
+  padding: 5rem 2rem;
+  max-width: 1200px; margin: 0 auto;
+}
+.section-bleed {
+  width: 100vw; margin-left: calc(-50vw + 50%);
+  padding: 6rem 2rem; text-align: center; color: white;
+  background-size: cover; background-position: center;
+}
+
+.eyebrow {
+  font-size: 0.78rem; font-weight: 700;
+  letter-spacing: 0.25em; text-transform: uppercase;
+  color: var(--olympic-blue); margin-bottom: 0.5rem;
+}
+
+/* === Tables === */
+.medal-table {
+  width: 100%; border-collapse: collapse;
+  font-size: 0.95rem; margin: 2rem 0;
+}
+.medal-table thead {
+  background: linear-gradient(135deg, rgba(0,133,199,0.06) 0%, rgba(223,0,36,0.06) 100%);
+}
+.medal-table th {
+  padding: 1rem; text-align: left; font-weight: 700;
+  font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--ink);
+}
+.medal-table td {
+  padding: 0.9rem 1rem; border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+.medal-table tbody tr:hover { background: rgba(0,133,199,0.04); }
+.medal-table .rank {
+  font-family: 'Playfair Display', serif; font-weight: 800;
+  font-size: 1.1rem; color: var(--olympic-blue);
+}
+.medal-table .rank-1 { color: var(--olympic-yellow); }
+.medal-table .rank-2 { color: #94a3b8; }
+.medal-table .rank-3 { color: #cd7f32; }
+.medal-table .country-flag {
+  display: inline-block; padding: 0.15rem 0.5rem;
+  background: var(--ink); color: white;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; font-weight: 700;
+  border-radius: 6px; margin-right: 0.5rem;
+}
+
+/* === Select === */
+.country-select {
+  padding: 0.7rem 1.2rem;
+  border-radius: 100px; border: 1px solid rgba(0,0,0,0.12);
+  background: white;
+  font-size: 0.92rem; font-weight: 500;
+  cursor: pointer; transition: all 0.2s;
+  font-family: inherit;
+}
+.country-select:hover { border-color: var(--olympic-blue); }
+.country-select:focus { outline: 2px solid var(--olympic-blue); outline-offset: 2px; }
+
+/* === Pull quote === */
+.pull-quote {
+  font-family: 'Playfair Display', serif;
+  font-style: italic; font-size: 1.4rem; font-weight: 500;
+  line-height: 1.55; padding: 1.5rem 0 1.5rem 2.5rem;
+  border-left: 4px solid var(--olympic-blue);
+  margin: 2.5rem 0; color: rgba(10,14,26,0.85);
+}
+
+/* === Footer === */
+.footer {
+  background: var(--ink-darker); color: rgba(255,255,255,0.6);
+  padding: 3rem 2rem; text-align: center; font-size: 0.9rem;
+  margin-top: 5rem;
+}
+
+@media (max-width: 768px) {
+  .hero-bg { background-attachment: scroll; }
+  .kpi-value { font-size: 2.4rem; }
+  .section { padding: 3rem 1rem; }
+}

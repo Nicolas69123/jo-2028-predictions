@@ -1,4 +1,4 @@
-discipline;event;event_gender
+Discipline;event;event_gender
 3x3 Basketball;Men;Male
 3x3 Basketball;Women;Female
 Archery;Men Individual;Male
@@ -256,16 +256,15 @@ Surfing;Men;Male
 Surfing;Women;Female
 Swimming;Men 50M Freestyle;Male
 Swimming;Men 100M Freestyle;Male
+Swimming;Men 100M Freestyle;Male
 Swimming;Men 200M Freestyle;Male
 Swimming;Men 400M Freestyle;Male
 Swimming;Men 800M Freestyle;Male
 Swimming;Men 1500M Freestyle;Male
 Swimming;Men 50M Breaststroke;Male
 Swimming;Men 100M Breaststroke;Male
+Swimming;Men 100M Breaststroke;Male
 Swimming;Men 200M Breaststroke;Male
-Swimming;Men 50M Backstroke;Male
-Swimming;Men 100M Backstroke;Male
-Swimming;Men 200M Backstroke;Male
 Swimming;Men 50M Butterfly;Male
 Swimming;Men 100M Butterfly;Male
 Swimming;Men 200M Butterfly;Male
@@ -276,16 +275,15 @@ Swimming;Men 4 X 200M Freestyle Relay;Male
 Swimming;Men 4 X 100M Medley Relay;Male
 Swimming;Women 50M Freestyle;Female
 Swimming;Women 100M Freestyle;Female
+Swimming;Women 100M Freestyle;Female
 Swimming;Women 200M Freestyle;Female
 Swimming;Women 400M Freestyle;Female
 Swimming;Women 800M Freestyle;Female
 Swimming;Women 1500M Freestyle;Female
 Swimming;Women 50M Breaststroke;Female
 Swimming;Women 100M Breaststroke;Female
+Swimming;Women 100M Breaststroke;Female
 Swimming;Women 200M Breaststroke;Female
-Swimming;Women 50M Backstroke;Female
-Swimming;Women 100M Backstroke;Female
-Swimming;Women 200M Backstroke;Female
 Swimming;Women 50M Butterfly;Female
 Swimming;Women 100M Butterfly;Female
 Swimming;Women 200M Butterfly;Female

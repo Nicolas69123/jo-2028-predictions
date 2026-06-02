@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YPerf — Prédiction du classement des JO 2028</title>
+  <meta name="description" content="Application data science prédisant les médailles des Jeux Olympiques de Los Angeles 2028.">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;700;800;900&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <link rel="stylesheet" href="assets/css/app.css">
+  <link rel="icon" type="image/svg+xml" href="assets/img/olympic-rings.svg">
+</head>
+
+<body>
+
+<nav class="app-nav">
+  <div class="max-w-7xl mx-auto flex items-center justify-between">
+    <a href="index.html" class="brand">
+      <img src="assets/img/olympic-rings.svg" alt="" class="rings-tiny" style="filter:brightness(0) invert(1);">
+      <span>YPerf</span>
+    </a>
+    <div class="flex items-center gap-3 sm:gap-6 md:gap-8 text-xs sm:text-sm">
+      <a href="index.html" class="whitespace-nowrap">Accueil</a>
+      <a href="predict.html" class="whitespace-nowrap">Prédictions<span class="hidden md:inline"> LA 2028</span></a>
+      <a href="methodology.html" class="whitespace-nowrap">Méthodologie</a>
+    </div>
+  </div>
+</nav>
+
+
+<section class="hero">
+  <div class="hero-bg"></div>
+
+  <div class="hero-content">
+    <img src="assets/img/olympic-rings.svg" alt="Anneaux olympiques" class="rings-large mx-auto mb-6" style="filter:brightness(0) invert(1); filter:drop-shadow(0 4px 12px rgba(0,0,0,0.4)) brightness(0) invert(1);">
+
+    <div class="chip">YPerf — Prédiction olympique</div>
+
+    <h1 class="font-serif font-black leading-none" style="font-size: clamp(3rem, 9vw, 7rem);">
+      <span class="block">Qui dominera</span>
+      <span class="block text-rainbow">Los Angeles 2028 ?</span>
+    </h1>
+
+    <p class="font-serif italic text-xl md:text-2xl mt-8 mb-12 max-w-2xl mx-auto opacity-90 leading-relaxed">
+      Trois modèles de régression entraînés sur 128 ans de Jeux Olympiques prédisent
+      le <strong class="not-italic font-semibold">classement final</strong> et la
+      <strong class="not-italic font-semibold">répartition Or / Argent / Bronze</strong> par discipline.
+    </p>
+
+    <div class="flex gap-4 justify-center flex-wrap">
+      <a href="predict.html" class="btn-primary">Voir les prédictions</a>
+      <a href="methodology.html" class="btn-secondary">La méthode</a>
+    </div>
+  </div>
+
+  <div class="scroll-arrow">Découvrir</div>
+</section>
+
+
+<section class="section">
+  <div class="text-center mb-12">
+    <div class="eyebrow">L'essentiel en chiffres</div>
+    <h2 class="font-serif font-black text-4xl md:text-5xl">128 ans, un dataset, trois modèles</h2>
+  </div>
+
+  <div class="kpi-grid" id="kpi-grid">
+    <!-- Filled by JS -->
+  </div>
+</section>
+
+
+<section class="section-bleed" style="background-image: linear-gradient(135deg, rgba(10,14,26,0.92) 0%, rgba(5,8,16,0.92) 100%), url('assets/img/LA.jpg');">
+  <img src="assets/img/olympic-rings.svg" alt="" class="rings-medium mx-auto mb-6" style="filter:brightness(0) invert(1); opacity:0.85;">
+
+  <div class="max-w-3xl mx-auto">
+    <div class="eyebrow text-white/60">La question</div>
+    <h2 class="font-serif font-black mb-6" style="font-size: clamp(2.5rem, 6vw, 5rem);">
+      Qui sera <span class="text-rainbow">numéro 1</span> ?
+    </h2>
+    <p class="font-serif italic text-xl md:text-2xl mb-10 opacity-90 leading-relaxed">
+      Notre modèle prédit le classement Or / Argent / Bronze pour les 30 sports les plus médaillés.
+      Découvrez les nations à suivre, et la cote prédite de chaque pays par discipline.
+    </p>
+    <a href="predict.html" class="btn-primary">Voir le classement complet</a>
+  </div>
+</section>
+
+
+<section class="section">
+  <div class="text-center mb-10">
+    <div class="eyebrow">Sous le capot</div>
+    <h2 class="font-serif font-black text-4xl md:text-5xl mb-4">Une approche scientifique</h2>
+    <p class="text-lg text-slate-600 max-w-2xl mx-auto">
+      Trois modèles de régression Ridge entraînés indépendamment pour prédire le nombre d'<strong>Or</strong>,
+      d'<strong>Argent</strong> et de <strong>Bronze</strong> par couple (pays × sport).
+    </p>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
+    <div class="bg-white rounded-2xl p-8 border border-slate-200">
+      <div class="text-xs font-bold tracking-widest uppercase mb-2" style="color: var(--olympic-blue);">01</div>
+      <h3 class="font-serif font-bold text-2xl mb-3">Acquisition</h3>
+      <p class="text-slate-600 leading-relaxed">7 sources de données ouvertes (Olympedia, World Bank, Wikipedia) couvrant 1896 à 2024, agrégées dans un fichier unique.</p>
+    </div>
+    <div class="bg-white rounded-2xl p-8 border border-slate-200">
+      <div class="text-xs font-bold tracking-widest uppercase mb-2" style="color: var(--olympic-yellow);">02</div>
+      <h3 class="font-serif font-bold text-2xl mb-3">Préparation</h3>
+      <p class="text-slate-600 leading-relaxed">Nettoyage, déduplication, agrégation par (pays × année × sport) avec décomposition Or / Argent / Bronze.</p>
+    </div>
+    <div class="bg-white rounded-2xl p-8 border border-slate-200">
+      <div class="text-xs font-bold tracking-widest uppercase mb-2" style="color: var(--olympic-red);">03</div>
+      <h3 class="font-serif font-bold text-2xl mb-3">Modélisation</h3>
+      <p class="text-slate-600 leading-relaxed">3 modèles Ridge avec GridSearchCV, validation par split temporel (train 1968-2016, test Paris 2024).</p>
+    </div>
+  </div>
+
+  <div class="text-center mt-12">
+    <a href="methodology.html" class="btn-primary">Méthodologie détaillée</a>
+  </div>
+</section>
+
+
+<footer class="footer">
+  <img src="assets/img/olympic-rings.svg" alt="" class="rings-tiny mx-auto mb-3" style="filter:brightness(0) invert(1); opacity:0.7;">
+  <div class="font-serif font-bold text-2xl text-white mb-2">YPerf</div>
+  <p class="mb-3">Projet Bachelor 3 YNOV — UF SPÉ Data & IA — 2026</p>
+  <p>Code sur <a href="https://github.com/Nicolas69123/jo-2028-predictions" target="_blank" class="text-white/80 hover:text-white">GitHub</a></p>
+</footer>
+
+
+<script>
+  fetch('data/kpis.json').then(r => r.json()).then(k => {
+    const fmt = n => n.toLocaleString('fr-FR');
+    document.getElementById('kpi-grid').innerHTML = `
+      <div class="kpi-card">
+        <div class="kpi-value">${k.n_editions}</div>
+        <div class="kpi-label">Éditions analysées<br>(1896 → 2024)</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-value">${k.n_countries}</div>
+        <div class="kpi-label">Pays médaillés<br>(NOC distincts)</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-value">${fmt(k.n_medals_total)}</div>
+        <div class="kpi-label">Médailles<br>cumulées</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-value">${k.country_r2.toFixed(2)}</div>
+        <div class="kpi-label">R² du modèle<br>(Paris 2024)</div>
+      </div>
+    `;
+  });
+</script>
+
+</body>
+</html>
