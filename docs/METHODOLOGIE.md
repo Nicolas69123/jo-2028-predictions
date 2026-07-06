@@ -49,9 +49,12 @@ via l'API Banque Mondiale (open data) et versionne pour la reproductibilite.
 
 | Modele | RMSE granulaire | RMSE pays | R2 pays |
 |---|---|---|---|
-| Ridge | 0.283 | 4.45 | 0.877 |
-| RandomForest | 0.278 | 4.26 | 0.888 |
-| XGBoost | 0.278 | 3.56 | 0.921 |
+| Ridge | 0.28 | 4.4 | 0.88 |
+| RandomForest | 0.28 | 4.3 | 0.89 |
+| XGBoost | 0.28 | 3.6 | 0.92 |
+
+(Valeurs arrondies ; les chiffres exacts de la derniere execution sont dans
+`model_metrics.json` et affiches dynamiquement sur la page methodologie du site.)
 
 XGBoost gagne sur 2024, mais l'avantage est mesure sur **une seule edition de
 test** : impossible d'exclure un sur-apprentissage des specificites de 2024.
