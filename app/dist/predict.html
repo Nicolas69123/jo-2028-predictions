@@ -90,6 +90,7 @@
           <th class="text-right" style="color: #94a3b8;">Argent</th>
           <th class="text-right" style="color: #cd7f32;">Bronze</th>
           <th class="text-right">Total</th>
+          <th class="text-right" style="color: #64748b;">Fourchette P10&#8211;P90</th>
         </tr>
       </thead>
       <tbody>
@@ -388,6 +389,7 @@ fetch('data/projection_2028.json').then(r => r.json()).then(data => {
         <td class="text-right font-mono" style="color: ${COLORS.silver};">${d.Silver_2028.toFixed(1)}</td>
         <td class="text-right font-mono" style="color: ${COLORS.bronze};">${d.Bronze_2028.toFixed(1)}</td>
         <td class="text-right font-mono font-semibold">${d.Total_2028.toFixed(1)}</td>
+        <td class="text-right font-mono" style="color: #64748b;">${d.Total_low != null ? `${d.Total_low.toFixed(0)}&#8211;${d.Total_high.toFixed(0)}` : '&#8212;'}</td>
       </tr>
     `;
   }).join('');

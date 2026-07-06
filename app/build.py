@@ -149,6 +149,9 @@ save("model_metrics", {
     "n_top_sports": len(model_bundle["top_sports"]),
     "trained_years": "1968-2016",
     "test_year": 2024,
+    # Comparaison Ridge / RandomForest / XGBoost (test 2024) et quantiles bootstrap
+    "model_comparison": model_bundle.get("model_comparison"),
+    "ci_quantiles": model_bundle.get("ci_quantiles"),
 })
 
 # === Predictions reel vs predit 2024 (pour valider visuellement) ===
