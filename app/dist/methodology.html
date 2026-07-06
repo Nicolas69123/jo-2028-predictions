@@ -45,17 +45,21 @@
     </p>
 
 
-    <h2 class="font-serif font-black text-3xl md:text-4xl mt-16 mb-6">Pipeline en trois étapes</h2>
+    <h2 class="font-serif font-black text-3xl md:text-4xl mt-16 mb-6">Pipeline en quatre étapes</h2>
 
     <div class="grid grid-cols-1 gap-6 my-8">
       <div class="bg-white rounded-2xl p-8 border border-slate-200">
         <div class="text-xs font-bold tracking-widest uppercase mb-2" style="color: var(--olympic-blue);">Étape 01 — Acquisition</div>
-        <h3 class="font-serif font-bold text-2xl mb-3">Deux sources versionnées</h3>
+        <h3 class="font-serif font-bold text-2xl mb-3">Quatre sources versionnées</h3>
         <p class="text-slate-600 leading-relaxed mb-4">
           <code class="bg-slate-100 px-2 py-0.5 rounded text-xs">JO_resultats.csv</code> : résultats
           olympiques 1896→2024 (incluant Paris 2024), validés contre les chiffres officiels du CIO.
           <code class="bg-slate-100 px-2 py-0.5 rounded text-xs">JO2028_sports.csv</code> : programme
-          officiel des disciplines de Los Angeles 2028.
+          officiel de Los Angeles 2028.
+          <code class="bg-slate-100 px-2 py-0.5 rounded text-xs">JO_date_ete.csv</code> : table de
+          référence des éditions d'été.
+          <code class="bg-slate-100 px-2 py-0.5 rounded text-xs">PIB_par_habitant.csv</code> : PIB par
+          habitant 1960→2024, acquis via l'API open data de la Banque Mondiale.
         </p>
         <ul class="text-sm text-slate-500 space-y-1 list-disc list-inside">
           <li>24 000 résultats individuels</li>
@@ -69,12 +73,27 @@
         <h3 class="font-serif font-bold text-2xl mb-3">Un fichier unique, propre</h3>
         <p class="text-slate-600 leading-relaxed mb-4">
           Filtrage des JO d'été, déduplication, agrégation au niveau (pays × année × sport).
-          Enrichissement avec la population (Banque Mondiale) et le continent.
+          Enrichissement avec la population, le PIB par habitant (correspondance codes CIO → ISO3)
+          et le continent.
         </p>
         <ul class="text-sm text-slate-500 space-y-1 list-disc list-inside">
           <li><code class="bg-slate-100 px-2 py-0.5 rounded text-xs">medals_per_country_sport.csv</code> — 6 849 lignes</li>
           <li>30 éditions × 158 pays × 70 sports</li>
-          <li>Colonnes : Year, NOC, Country, Sport, Gold, Silver, Bronze, Total, Population, Continent</li>
+          <li>Colonnes : Year, NOC, Country, Sport, Gold, Silver, Bronze, Total, Population, GDP_per_capita, Continent</li>
+        </ul>
+      </div>
+
+      <div class="bg-white rounded-2xl p-8 border border-slate-200">
+        <div class="text-xs font-bold tracking-widest uppercase mb-2" style="color: var(--olympic-green, #16a34a);">Étape 02b — Exploration statistique</div>
+        <h3 class="font-serif font-bold text-2xl mb-3">Les données valident les features</h3>
+        <p class="text-slate-600 leading-relaxed mb-4">
+          Statistique descriptive (distribution très asymétrique, 80 % des médailles concentrées
+          par une minorité de pays), corrélations de Spearman (le passé récent domine),
+          et test de Wilcoxon apparié sur l'effet pays hôte.
+        </p>
+        <ul class="text-sm text-slate-500 space-y-1 list-disc list-inside">
+          <li>Effet hôte : p = 0.0007, boost médian +10.5 médailles</li>
+          <li>La feature <code class="bg-slate-100 px-2 py-0.5 rounded text-xs">is_host</code> est statistiquement justifiée</li>
         </ul>
       </div>
 
@@ -86,10 +105,10 @@
           pour éviter le data leakage. GridSearchCV sur le paramètre de régularisation.
         </p>
         <ul class="text-sm text-slate-500 space-y-1 list-disc list-inside">
-          <li>Features : <code class="bg-slate-100 px-2 py-0.5 rounded text-xs">lag_1, lag_2, rolling_3, is_host, log_population, Continent, Sport</code></li>
+          <li>Features : <code class="bg-slate-100 px-2 py-0.5 rounded text-xs">lag_1, lag_2, rolling_3, is_host, log_population, log_gdp, Continent, Sport</code></li>
           <li>Train : 1968-2016 (13 éditions)</li>
           <li>Test : Paris 2024</li>
-          <li>R² au niveau pays : <strong>0.87</strong></li>
+          <li>R² au niveau pays : <strong>0.88</strong> (RMSE 4.4 médailles)</li>
         </ul>
       </div>
     </div>
