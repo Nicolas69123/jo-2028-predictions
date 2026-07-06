@@ -5,6 +5,7 @@
 **Sujet :** Performances sportives pour les JO 2028 a Los Angeles (sujet 3)
 **Date de creation :** 2026-03-12
 **Refonte :** 2026-05-12 -- scope reduit pour focus sur la prediction
+**Finalisation :** 2026-07-06 -- PIB, EDA statistique, comparaison de modeles, IC bootstrap, tests, docs
 
 ---
 
@@ -32,9 +33,10 @@ Cette simplification permet de :
 
 ```
 notebooks/
-  01_acquisition.ipynb   -- telecharge les donnees brutes
-  02_preparation.ipynb   -- nettoyage + agregation -> 1 fichier unique
-  03_modelisation.ipynb  -- 3 modeles Ridge (Or, Argent, Bronze) + projection LA 2028
+  01_acquisition.ipynb   -- charge et controle les 4 sources (dont PIB via API Banque Mondiale)
+  02_preparation.ipynb   -- nettoyage + agregation + enrichissement -> 1 fichier unique
+  02b_exploration.ipynb  -- EDA + statistiques inferentielles (effet hote, correlations)
+  03_modelisation.ipynb  -- 3 Ridge + comparaison RF/XGBoost + projection 2028 + IC bootstrap
 
 data/
   raw/                   -- CSV bruts telecharges automatiquement (gitignored)
@@ -61,22 +63,25 @@ app/
 ## Pipeline de bout en bout
 
 ### 1. Acquisition (`01_acquisition.ipynb`)
-- Telechargement automatique des 4 CSV necessaires depuis KeithGalli/Olympics-Dataset
-- Verification de coherence (NOC, periode, etc.)
+- Chargement des 4 sources : JO_resultats, JO2028_sports, JO_date_ete (versionnees)
+  et PIB_par_habitant (API open data Banque Mondiale, versionne, retelecharge si absent)
+- Verification de coherence (NOC, periode, valeurs manquantes, doublons)
 
 ### 2. Preparation (`02_preparation.ipynb`)
 - Filtrage JO d'ete uniquement
 - Deduplication (bugs scraping connus : Sailing 1900, Golf 1904)
 - Integration Paris 2024 depuis olympics_1896_2024.csv (avec deduplication des athletes equipe)
 - Agregation par (NOC, Year, Sport) -> Gold/Silver/Bronze/Total
-- Enrichissement avec population (Banque Mondiale) et continent
+- Enrichissement avec population, PIB/habitant (Banque Mondiale) et continent
 
 ### 3. Modelisation (`03_modelisation.ipynb`)
 - Grille complete (NOC x Year x Sport) avec zeros
-- Feature engineering : lag_1, lag_2, rolling_3 par couleur + is_host + log_population + Continent
+- Feature engineering : lag_1, lag_2, rolling_3 par couleur + is_host + log_population + log_gdp + Continent
 - 3 modeles Ridge entraines independamment (Or, Argent, Bronze)
 - GridSearchCV sur alpha (regularisation L2)
+- Comparaison chiffree Ridge vs RandomForest vs XGBoost (memes features, meme split)
 - Split temporel : train 1968-2016, test 2024
+- Intervalles de confiance P10-P90 par bootstrap des residus relatifs (B=2000)
 - Sauvegarde du bundle complet + projection LA 2028
 
 ### 4. Application (`app/`)
@@ -90,10 +95,14 @@ app/
 
 | Niveau | Metric | Valeur |
 |---|---|---|
-| (pays, sport) granulaire | R² | 0.14 |
+| (pays, sport) granulaire | R² | 0.52 |
 | (pays, sport) granulaire | MAE | 0.08 medaille |
-| **Pays agrege** | **R²** | **0.86** |
-| **Pays agrege** | **RMSE** | **4.5 medailles** |
+| **Pays agrege** | **R²** | **0.88** |
+| **Pays agrege** | **RMSE** | **4.4 medailles** |
+
+Comparaison de modeles (test Paris 2024) : XGBoost fait mieux au niveau pays
+(RMSE 3.6, R² 0.92) mais sur une seule edition de test ; Ridge est conserve pour
+son interpretabilite et sa stabilite (details : docs/METHODOLOGIE.md).
 
 ## Source des donnees
 
@@ -112,18 +121,18 @@ predit avec une bonne fiabilite).
 
 ## Top 10 LA 2028 predit
 
-| Rang | Pays | Or | Argent | Bronze | Total |
-|---|---|---|---|---|---|
-| 1 | USA (hote) | 39 | 36 | 28 | 103 |
-| 2 | Chine | 28 | 18 | 16 | 61 |
-| 3 | Japon | 13 | 7 | 10 | 29 |
-| 4 | Grande-Bretagne | 11 | 14 | 15 | 40 |
-| 5 | Australie | 11 | 8 | 11 | 29 |
-| 6 | Italie | 8 | 8 | 10 | 27 |
-| 7 | Pays-Bas | 8 | 6 | 7 | 21 |
-| 8 | France | 8 | 11 | 11 | 30 |
-| 9 | Coree du Sud | 7 | 5 | 7 | 19 |
-| 10 | Allemagne | 7 | 8 | 11 | 25 |
+| Rang | Pays | Or | Argent | Bronze | Total | Fourchette P10-P90 |
+|---|---|---|---|---|---|---|
+| 1 | USA (hote) | 43 | 37 | 30 | 110 | 31-150 |
+| 2 | Chine | 28 | 18 | 16 | 63 | 18-86 |
+| 3 | Japon | 15 | 9 | 11 | 35 | 10-48 |
+| 4 | Grande-Bretagne | 13 | 16 | 16 | 45 | 13-61 |
+| 5 | Australie | 11 | 9 | 12 | 32 | 9-44 |
+| 6 | Italie | 10 | 10 | 12 | 32 | 9-44 |
+| 7 | France | 10 | 14 | 12 | 35 | 10-48 |
+| 8 | Pays-Bas | 8 | 7 | 8 | 23 | 6-31 |
+| 9 | Allemagne | 8 | 9 | 11 | 29 | 8-39 |
+| 10 | Coree du Sud | 8 | 5 | 8 | 21 | 6-29 |
 
 ---
 
@@ -154,7 +163,8 @@ Le brief mentionne "athletes a suivre" mais cette information est tres bruitee
   pas d'historique, donc impossibles a predire.
 - **Effet pays hote modelise simplement** (variable binaire), sans capter l'amplitude
   exacte (Chine 2008 a eu un boost different de Bresil 2016).
-- **Pas de modelisation de l'incertitude** : on donne un nombre exact, pas un IC.
+- **Incertitude quantifiee mais large** : fourchettes P10-P90 par bootstrap des
+  residus du test 2024, sous hypothese de stationnarite des erreurs.
 
 ---
 
@@ -169,6 +179,7 @@ python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 jupyter nbconvert --to notebook --execute notebooks/01_acquisition.ipynb
 jupyter nbconvert --to notebook --execute notebooks/02_preparation.ipynb
+jupyter nbconvert --to notebook --execute notebooks/02b_exploration.ipynb
 jupyter nbconvert --to notebook --execute notebooks/03_modelisation.ipynb
 python app/build.py
 # Site dans app/dist/, lancer un serveur local :
