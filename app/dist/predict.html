@@ -65,6 +65,11 @@
 
   <div class="kpi-grid mb-12" id="metrics-grid"></div>
 
+  <!-- Scatter reel vs predit : chaque point est un pays, la diagonale = prediction parfaite -->
+  <div class="plot-container">
+    <div id="plot-validation" style="height: 520px;"></div>
+  </div>
+
 
   <!-- CLASSEMENT LA 2028 -->
   <div class="text-center mt-20 mb-8">
@@ -76,8 +81,20 @@
     </p>
   </div>
 
+  <!-- Podium top 3 : le resultat final en un coup d'oeil -->
+  <div class="podium-wrap" id="podium"></div>
+
   <div class="plot-container">
     <div id="plot-top10" style="height: 550px;"></div>
+  </div>
+
+  <!-- Barre d'outils du classement : recherche + affichage complet + export -->
+  <div class="flex items-center gap-3 flex-wrap mt-10 mb-2">
+    <input id="ranking-search" type="text" placeholder="Rechercher un pays dans le classement…"
+           autocomplete="off"
+           style="flex:1; min-width:220px; padding:0.6rem 1rem; border:1px solid rgba(0,0,0,0.15); border-radius:12px; font-family:inherit; font-size:0.9rem;">
+    <button id="ranking-toggle" class="year-chip">Afficher les 159 pays</button>
+    <button id="ranking-csv" class="year-chip">Télécharger le CSV</button>
   </div>
 
   <div class="overflow-x-auto mt-6">
@@ -189,6 +206,31 @@
       border-color: var(--olympic-red);
     }
     .mode-btn { cursor: pointer; font-family: inherit; }
+
+    /* === Podium top 3 === */
+    .podium-wrap {
+      display: flex; align-items: flex-end; justify-content: center; gap: 1rem;
+      margin: 2.5rem auto 3rem; max-width: 760px;
+    }
+    .podium-col { flex: 1; display: flex; flex-direction: column; align-items: center; min-width: 0; }
+    .podium-country { text-align: center; margin-bottom: 0.9rem; }
+    .podium-emoji { font-size: 2.2rem; line-height: 1; margin-bottom: 0.4rem; }
+    .podium-name { font-weight: 700; font-size: 0.95rem; line-height: 1.25; }
+    .podium-medals { display: flex; gap: 0.55rem; justify-content: center; font-size: 0.8rem; font-weight: 600; margin-top: 0.35rem; }
+    .podium-total { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: #64748b; margin-top: 0.25rem; }
+    .podium-step {
+      width: 100%; border-radius: 14px 14px 0 0;
+      display: flex; align-items: flex-start; justify-content: center;
+      font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 1.6rem;
+      color: rgba(255,255,255,0.9); padding-top: 0.6rem;
+    }
+    .podium-col.first  .podium-step { height: 120px; background: linear-gradient(180deg, #D4AF37, #b3922a); }
+    .podium-col.second .podium-step { height: 86px;  background: linear-gradient(180deg, #a8b4c4, #8b99ab); }
+    .podium-col.third  .podium-step { height: 62px;  background: linear-gradient(180deg, #cd7f32, #aa6626); }
+    @media (max-width: 640px) {
+      .podium-name { font-size: 0.8rem; }
+      .podium-emoji { font-size: 1.6rem; }
+    }
 
     /* === Multi-select pays (boite tags + recherche + dropdown) === */
     .ms-box {
@@ -405,9 +447,62 @@ fetch('data/model_metrics.json').then(r => r.json()).then(m => {
 });
 
 
+// === VALIDATION : scatter reel vs predit Paris 2024 ===
+fetch('data/validation_2024.json').then(r => r.json()).then(data => {
+  const pts = data.filter(d => d.pred_2024 != null && (d.real_2024 >= 1 || d.pred_2024 >= 1));
+  const maxV = Math.max(...pts.map(d => Math.max(d.real_2024, d.pred_2024))) * 1.08;
+
+  Plotly.newPlot('plot-validation', [
+    {
+      // Diagonale y = x : la prediction parfaite
+      x: [0, maxV], y: [0, maxV], type: 'scatter', mode: 'lines',
+      line: { color: 'rgba(100,116,139,0.45)', dash: 'dash', width: 1.5 },
+      hoverinfo: 'skip', showlegend: false,
+    },
+    {
+      x: pts.map(d => d.real_2024), y: pts.map(d => d.pred_2024),
+      text: pts.map(d => d.Country),
+      type: 'scatter', mode: 'markers',
+      marker: { color: 'rgba(0,133,199,0.75)', size: 9, line: { color: 'white', width: 1 } },
+      hovertemplate: '<b>%{text}</b><br>Réel : %{x}<br>Prédit : %{y:.1f}<extra></extra>',
+      showlegend: false,
+    },
+  ], {
+    ...PLOTLY_LAYOUT,
+    title: { ...PLOTLY_LAYOUT.title, text: 'Paris 2024 — réel vs prédit (chaque point est un pays)' },
+    xaxis: { ...PLOTLY_LAYOUT.xaxis, title: 'Médailles réelles', range: [-2, maxV] },
+    yaxis: { ...PLOTLY_LAYOUT.yaxis, title: 'Médailles prédites', range: [-2, maxV] },
+    annotations: [{
+      x: maxV * 0.72, y: maxV * 0.78, text: 'Diagonale = prédiction parfaite',
+      showarrow: false, font: { size: 12, color: '#64748b' }, textangle: -38,
+    }],
+    margin: { l: 70, r: 30, t: 60, b: 60 },
+    height: 520,
+  }, PLOTLY_CONFIG);
+});
+
+
 // === CLASSEMENT LA 2028 ===
 fetch('data/projection_2028.json').then(r => r.json()).then(data => {
-  const top20 = data.slice(0, 20);
+
+  // --- Podium top 3 : le resultat final ---
+  const [p1, p2, p3] = data;
+  const step = (d, cls, place, emoji) => `
+    <div class="podium-col ${cls}">
+      <div class="podium-country">
+        <div class="podium-emoji">${emoji}</div>
+        <div class="podium-name">${d.Country}</div>
+        <div class="podium-medals">
+          <span style="color:${COLORS.gold};">&#9679; ${d.Gold_2028.toFixed(0)}</span>
+          <span style="color:${COLORS.silver};">&#9679; ${d.Silver_2028.toFixed(0)}</span>
+          <span style="color:${COLORS.bronze};">&#9679; ${d.Bronze_2028.toFixed(0)}</span>
+        </div>
+        <div class="podium-total">${d.Total_2028.toFixed(0)} médailles</div>
+      </div>
+      <div class="podium-step">${place}</div>
+    </div>`;
+  document.getElementById('podium').innerHTML =
+    step(p2, 'second', '2', '&#129352;') + step(p1, 'first', '1', '&#129351;') + step(p3, 'third', '3', '&#129353;');
 
   // Graph top 10 stacked bar
   const top10 = data.slice(0, 10).reverse();
@@ -447,11 +542,20 @@ fetch('data/projection_2028.json').then(r => r.json()).then(data => {
     margin: { l: 130, r: 30, t: 60, b: 50 },
   }, PLOTLY_CONFIG);
 
-  // Table top 20
+  // --- Table de classement : top 20 par defaut, recherche, 159 pays, export CSV ---
   const tbody = document.querySelector('#ranking-table tbody');
-  tbody.innerHTML = top20.map(d => {
-    const rankClass = d.Rank === 1 ? 'rank-1' : d.Rank === 2 ? 'rank-2' : d.Rank === 3 ? 'rank-3' : '';
-    return `
+  const searchEl = document.getElementById('ranking-search');
+  const toggleEl = document.getElementById('ranking-toggle');
+  let showAll = false;
+
+  function renderTable() {
+    const q = searchEl.value.trim().toLowerCase();
+    let rows = q
+      ? data.filter(d => d.Country.toLowerCase().includes(q) || d.NOC.toLowerCase().includes(q))
+      : (showAll ? data : data.slice(0, 20));
+    tbody.innerHTML = rows.map(d => {
+      const rankClass = d.Rank === 1 ? 'rank-1' : d.Rank === 2 ? 'rank-2' : d.Rank === 3 ? 'rank-3' : '';
+      return `
       <tr>
         <td><span class="rank ${rankClass}">${d.Rank}</span></td>
         <td><span class="country-flag">${d.NOC}</span>${d.Country}</td>
@@ -460,9 +564,34 @@ fetch('data/projection_2028.json').then(r => r.json()).then(data => {
         <td class="text-right font-mono" style="color: ${COLORS.bronze};">${d.Bronze_2028.toFixed(1)}</td>
         <td class="text-right font-mono font-semibold">${d.Total_2028.toFixed(1)}</td>
         <td class="text-right font-mono" style="color: #64748b;">${d.Total_low != null ? `${d.Total_low.toFixed(0)}&#8211;${d.Total_high.toFixed(0)}` : '&#8212;'}</td>
-      </tr>
-    `;
-  }).join('');
+      </tr>`;
+    }).join('') || '<tr><td colspan="7" class="text-center text-slate-400 py-8">Aucun pays trouvé</td></tr>';
+  }
+
+  searchEl.addEventListener('input', renderTable);
+  toggleEl.addEventListener('click', () => {
+    showAll = !showAll;
+    toggleEl.textContent = showAll ? 'Revenir au top 20' : `Afficher les ${data.length} pays`;
+    toggleEl.classList.toggle('active', showAll);
+    renderTable();
+  });
+  toggleEl.textContent = `Afficher les ${data.length} pays`;
+
+  // Export CSV du classement complet (avec fourchettes)
+  document.getElementById('ranking-csv').addEventListener('click', () => {
+    const header = 'Rank;NOC;Country;Gold_2028;Silver_2028;Bronze_2028;Total_2028;Total_low;Total_high';
+    const lines = data.map(d =>
+      [d.Rank, d.NOC, `"${d.Country}"`, d.Gold_2028, d.Silver_2028, d.Bronze_2028,
+       d.Total_2028, d.Total_low ?? '', d.Total_high ?? ''].join(';'));
+    const blob = new Blob([header + '\n' + lines.join('\n')], { type: 'text/csv;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'projection_la2028_yperf.csv';
+    a.click();
+    URL.revokeObjectURL(a.href);
+  });
+
+  renderTable();
 });
 
 

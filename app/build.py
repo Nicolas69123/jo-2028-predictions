@@ -154,16 +154,18 @@ save("model_metrics", {
     "ci_quantiles": model_bundle.get("ci_quantiles"),
 })
 
-# === Predictions reel vs predit 2024 (pour valider visuellement) ===
-test_results = []
-for _, row in projection_country.iterrows():
-    real = df[(df["Year"] == 2024) & (df["NOC"] == row["NOC"])]["Total"].sum()
-    test_results.append({
+# === Predictions reel vs predit 2024 (scatter de validation du site) ===
+# Sorties reelles du split test du notebook 03 (le modele n'a jamais vu 2024)
+validation = pd.read_csv(PROCESSED_DIR / "validation_2024_country.csv")
+test_results = [
+    {
         "NOC": row["NOC"],
         "Country": str(row["Country"]),
-        "real_2024": int(real),
-        "pred_2024_via_2028_model": None,
-    })
-save("validation_2024", test_results[:30])
+        "real_2024": int(row["real_Total"]),
+        "pred_2024": float(row["pred_Total"]),
+    }
+    for _, row in validation.sort_values("real_Total", ascending=False).iterrows()
+]
+save("validation_2024", test_results)
 
 print("\nBuild complete.")
