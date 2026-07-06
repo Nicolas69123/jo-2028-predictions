@@ -127,9 +127,13 @@
       <div>
         <h3 class="font-serif font-bold text-xl mb-2">Pourquoi Ridge et pas Random Forest ou XGBoost ?</h3>
         <p class="leading-relaxed">
-          On a comparé les 3. <strong>Ridge gagne</strong> car avec seulement 13 années d'entraînement,
-          les modèles complexes overfittent les patterns historiques au lieu de généraliser.
-          C'est un cas d'école du <strong>bias-variance tradeoff</strong> : moins de données, modèle plus simple.
+          Les trois modèles ont été entraînés sur les mêmes features et le même split temporel
+          (notebook <code class="bg-slate-100 px-2 py-0.5 rounded text-sm">03_modelisation</code>).
+          Sur le test Paris 2024, XGBoost obtient le meilleur RMSE pays (3.6 contre 4.5 pour Ridge),
+          mais cet avantage est mesuré sur <strong>une seule édition de test</strong> : impossible d'exclure
+          un sur-apprentissage des spécificités de 2024. <strong>Ridge est conservé</strong> pour son
+          interprétabilité (coefficients lisibles, essentiels au data storytelling) et sa stabilité
+          (régularisation L2). XGBoost est noté comme perspective avec davantage d'éditions de test.
         </p>
       </div>
     </div>
@@ -150,8 +154,10 @@
     </div>
 
     <div class="bg-amber-50 border-l-4 border-amber-500 p-5 rounded-r-xl text-slate-700 mb-4">
-      <strong>Pas de modélisation de l'incertitude.</strong> Les prédictions sont des nombres exacts.
-      Pour donner des intervalles de confiance, il faudrait passer à un modèle bayésien.
+      <strong>Incertitude quantifiée par bootstrap.</strong> Chaque prédiction est accompagnée d'une
+      fourchette P10&#8211;P90 obtenue par bootstrap des résidus relatifs observés sur le test Paris 2024
+      (pays &#8805; 5 médailles prédites, B = 2000). Les fourchettes sont larges : elles reflètent
+      honnêtement la variance réelle du problème. Un modèle bayésien complet reste une perspective.
     </div>
 
 
