@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - fix/data-source-cio-validation
     paths:
       - "app/dist/**"
       - ".github/workflows/deploy-pages.yml"
