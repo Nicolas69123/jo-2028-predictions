@@ -38,3 +38,48 @@ class TestExportsJson:
         historique = _load("historical_top5")
         assert len(historique) == 5
         assert {"NOC", "Country", "data"}.issubset(historique[0].keys())
+
+
+class TestCoherenceAffichage:
+    """Les totaux affiches par le site doivent matcher la base, pays par pays."""
+
+    def test_totals_by_year_egaux_a_la_base(self, processed):
+        data = _load("per_sport_predictions")
+        ecarts = []
+        for c in data:
+            for year, t in c["totals_by_year"].items():
+                if year == "2028":
+                    continue  # prediction, pas dans la base
+                base = processed[(processed["NOC"] == c["NOC"])
+                                 & (processed["Year"] == int(year))]
+                attendu = (int(base["Gold"].sum()), int(base["Silver"].sum()),
+                           int(base["Bronze"].sum()), int(base["Total"].sum()))
+                montre = (t["Gold"], t["Silver"], t["Bronze"], t["Total"])
+                if montre != attendu:
+                    ecarts.append(f"{c['NOC']} {year}: {montre} != {attendu}")
+        assert ecarts == [], ecarts[:10]
+
+    def test_totals_2028_egaux_a_la_projection(self, projection):
+        data = _load("per_sport_predictions")
+        proj = projection.set_index("NOC")
+        for c in data:
+            if c["NOC"] in proj.index:
+                assert abs(c["totals_by_year"]["2028"]["Total"]
+                           - proj.loc[c["NOC"], "Total_2028"]) < 0.11, c["NOC"]
+
+    def test_historique_top5_egal_a_la_base(self, processed):
+        for pays in _load("historical_top5"):
+            for rec in pays["data"]:
+                base = processed[(processed["NOC"] == pays["NOC"])
+                                 & (processed["Year"] == rec["Year"])]
+                assert rec["Total"] == int(base["Total"].sum()), \
+                    f"{pays['NOC']} {rec['Year']}"
+
+    def test_validation_reelle_egale_a_la_base_perimetre_modele(self, processed, bundle):
+        # Le scatter de validation porte sur les 30 sports modelises
+        top_sports = set(bundle["top_sports"])
+        p24 = processed[(processed["Year"] == 2024)
+                        & (processed["Sport"].isin(top_sports))]
+        for d in _load("validation_2024")[:30]:
+            attendu = int(p24[p24["NOC"] == d["NOC"]]["Total"].sum())
+            assert d["real_2024"] == attendu, f"{d['NOC']}: {d['real_2024']} != {attendu}"

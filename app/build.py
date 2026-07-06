@@ -80,6 +80,24 @@ for noc in all_nocs:
     top_sports_country = (proj_country.sort_values("pred_Total", ascending=False)
                           .head(15)["Sport"].tolist())
 
+    # Totaux EXACTS par annee, calcules sur TOUS les sports de la base
+    # (le detail par sport ci-dessous est limite au top 15 pour l'affichage,
+    # mais les totaux montres a l'utilisateur doivent matcher la base)
+    totals_by_year = {}
+    for year in YEARS_REAL:
+        y = df[(df["Year"] == year) & (df["NOC"] == noc)]
+        totals_by_year[str(year)] = {
+            "Gold": int(y["Gold"].sum()), "Silver": int(y["Silver"].sum()),
+            "Bronze": int(y["Bronze"].sum()), "Total": int(y["Total"].sum()),
+        }
+    proj_row = projection_country[projection_country["NOC"] == noc].iloc[0]
+    totals_by_year["2028"] = {
+        "Gold": round(float(proj_row["Gold_2028"]), 1),
+        "Silver": round(float(proj_row["Silver_2028"]), 1),
+        "Bronze": round(float(proj_row["Bronze_2028"]), 1),
+        "Total": round(float(proj_row["Total_2028"]), 1),
+    }
+
     # Donnees REELLES par annee x sport (valeurs entieres)
     by_year = {}
     for year in YEARS_REAL:
@@ -128,6 +146,7 @@ for noc in all_nocs:
         "sports_list": top_sports_country,
         "available_years": YEARS_REAL + [2028],
         "by_year": by_year,
+        "totals_by_year": totals_by_year,
     })
 
 save("per_sport_predictions", per_sport_data)

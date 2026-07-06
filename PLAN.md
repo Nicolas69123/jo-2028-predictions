@@ -129,7 +129,7 @@ predit avec une bonne fiabilite).
 | 4 | Grande-Bretagne | 13 | 16 | 16 | 45 | 13-61 |
 | 5 | Australie | 11 | 9 | 12 | 32 | 9-44 |
 | 6 | Italie | 10 | 10 | 12 | 32 | 9-44 |
-| 7 | France | 10 | 14 | 12 | 35 | 10-48 |
+| 7 | France | 10 | 14 | 12 | 36 | 10-48 |
 | 8 | Pays-Bas | 8 | 7 | 8 | 23 | 6-31 |
 | 9 | Allemagne | 8 | 9 | 11 | 29 | 8-39 |
 | 10 | Coree du Sud | 8 | 5 | 8 | 21 | 6-29 |
