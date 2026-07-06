@@ -120,12 +120,15 @@
       </div>
     </div>
 
-    <!-- Pays (mode single : 1 pays) -->
+    <!-- Pays (mode single : combobox avec recherche, meme composant que le mode compare) -->
     <div class="flex items-center gap-4 flex-wrap" id="single-country-row">
-      <label for="country-select" class="text-sm font-semibold text-slate-700 w-24">Pays :</label>
-      <select id="country-select" class="country-select" style="min-width: 240px;">
-        <option value="">Chargement...</option>
-      </select>
+      <label class="text-sm font-semibold text-slate-700 w-24 pt-2">Pays :</label>
+      <div style="width: 340px; max-width: 100%;">
+        <div id="ss-box" class="ms-box">
+          <input id="ss-input" class="ms-input" type="text" placeholder="Rechercher un pays…" autocomplete="off">
+          <div id="ss-dropdown" class="ms-dropdown hidden"></div>
+        </div>
+      </div>
       <span class="text-xs text-slate-500 ml-auto" id="country-total">—</span>
     </div>
 
@@ -245,10 +248,13 @@
 
   <div class="bg-white p-5 rounded-2xl border border-slate-200 mb-4">
     <div class="flex items-center gap-4 flex-wrap">
-      <label for="evo-country-select" class="text-sm font-semibold text-slate-700 w-24">Pays :</label>
-      <select id="evo-country-select" class="country-select" style="min-width: 220px;">
-        <option value="">Chargement...</option>
-      </select>
+      <label class="text-sm font-semibold text-slate-700 w-24 pt-2">Pays :</label>
+      <div style="width: 340px; max-width: 100%;">
+        <div id="evo-box" class="ms-box">
+          <input id="evo-input" class="ms-input" type="text" placeholder="Rechercher un pays…" autocomplete="off">
+          <div id="evo-dropdown" class="ms-dropdown hidden"></div>
+        </div>
+      </div>
       <span class="text-xs text-slate-500 ml-auto" id="evo-total">—</span>
     </div>
   </div>
@@ -310,6 +316,70 @@ const PLOTLY_CONFIG = {
   responsive: true, displaylogo: false,
   modeBarButtonsToRemove: ['lasso2d', 'select2d', 'autoScale2d'],
 };
+
+
+// === Combobox pays (mono-selection, avec recherche) ===
+// Meme composant visuel que le multi-select du mode comparaison :
+// dropdown borne (max-height + scroll interne) au lieu du <select> natif
+// qui deroule ses 159 options sur tout l'ecran.
+function createCountryCombobox({ box, input, dropdown, options, initialNoc, onSelect }) {
+  let highlight = 0;
+  let typed = false;   // avant la premiere frappe, on montre la liste complete
+  let selected = options.find(o => o.NOC === initialNoc) || null;
+
+  const filtered = () => {
+    const q = typed ? input.value.trim().toLowerCase() : '';
+    return options.filter(d =>
+      q === '' || d.Country.toLowerCase().includes(q) || d.NOC.toLowerCase().includes(q));
+  };
+
+  function render() {
+    const opts = filtered();
+    if (opts.length === 0) {
+      dropdown.innerHTML = '<div class="ms-empty">Aucun pays trouvé</div>';
+      return;
+    }
+    highlight = Math.min(highlight, opts.length - 1);
+    dropdown.innerHTML = opts.map((d, i) =>
+      `<div class="ms-option ${i === highlight ? 'highlight' : ''}" data-noc="${d.NOC}">
+        <span>${d.Country}</span><span class="noc">${d.NOC}</span>
+      </div>`).join('');
+    dropdown.querySelectorAll('.ms-option').forEach(opt => {
+      opt.addEventListener('mousedown', e => {  // mousedown : avant le blur de l'input
+        e.preventDefault();
+        choose(opt.dataset.noc);
+      });
+    });
+  }
+
+  function open() { box.classList.add('focused'); render(); dropdown.classList.remove('hidden'); }
+  function close() {
+    box.classList.remove('focused'); dropdown.classList.add('hidden');
+    input.value = selected ? selected.Country : '';   // restaure le pays choisi
+  }
+
+  function choose(noc) {
+    selected = options.find(o => o.NOC === noc) || selected;
+    typed = false;
+    input.blur();
+    close();
+    onSelect(noc);
+  }
+
+  box.addEventListener('click', () => input.focus());
+  input.addEventListener('focus', () => { typed = false; input.select(); open(); });
+  input.addEventListener('blur', close);
+  input.addEventListener('input', () => { typed = true; highlight = 0; render(); });
+  input.addEventListener('keydown', e => {
+    const opts = filtered();
+    if (e.key === 'ArrowDown') { e.preventDefault(); highlight = Math.min(highlight + 1, opts.length - 1); render(); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); highlight = Math.max(highlight - 1, 0); render(); }
+    else if (e.key === 'Enter') { e.preventDefault(); if (opts[highlight]) choose(opts[highlight].NOC); }
+    else if (e.key === 'Escape') { input.blur(); }
+  });
+
+  if (selected) input.value = selected.Country;
+}
 
 
 // === METRIQUES ===
@@ -398,7 +468,6 @@ fetch('data/projection_2028.json').then(r => r.json()).then(data => {
 
 // === COTE PAR DISCIPLINE / COMPARAISON PAYS ===
 fetch('data/per_sport_predictions.json').then(r => r.json()).then(data => {
-  const select = document.getElementById('country-select');
   const totalEl = document.getElementById('country-total');
   const yearControlsEl = document.getElementById('year-controls');
   const yearLabelEl = document.getElementById('year-label');
@@ -430,9 +499,15 @@ fetch('data/per_sport_predictions.json').then(r => r.json()).then(data => {
 
   const nameOf = noc => (data.find(d => d.NOC === noc) || {}).Country || noc;
 
-  // Dropdown pays (mode single) -- ordre alphabetique
-  select.innerHTML = '<option value="">— Sélectionner un pays —</option>' +
-    dataSorted.map(d => `<option value="${d.NOC}">${d.Country}</option>`).join('');
+  // Combobox pays (mode single) -- meme composant que le multi-select
+  createCountryCombobox({
+    box: document.getElementById('ss-box'),
+    input: document.getElementById('ss-input'),
+    dropdown: document.getElementById('ss-dropdown'),
+    options: dataSorted,
+    initialNoc: 'USA',
+    onSelect: noc => { state.noc = noc; renderPlot(); },
+  });
 
   // ============================================================
   // MULTI-SELECT : tags + champ de recherche filtrant + dropdown
@@ -659,22 +734,15 @@ fetch('data/per_sport_predictions.json').then(r => r.json()).then(data => {
   }
 
   // === Init ===
-  select.value = 'USA';
   state.noc = 'USA';
   renderCompareControls();
   renderYearControls();
   renderPlot();
-
-  select.addEventListener('change', e => {
-    state.noc = e.target.value;
-    renderPlot();
-  });
 });
 
 
 // === EVOLUTION DANS LE TEMPS (courbes Or/Argent/Bronze/Total) ===
 fetch('data/per_sport_predictions.json').then(r => r.json()).then(data => {
-  const select = document.getElementById('evo-country-select');
   const totalEl = document.getElementById('evo-total');
   // Annees lues depuis les donnees (1952->2028)
   const YEARS = (data[0] ? data[0].available_years : []).map(Number);
@@ -682,8 +750,6 @@ fetch('data/per_sport_predictions.json').then(r => r.json()).then(data => {
 
   // Pays tries alphabetiquement
   const dataSorted = [...data].sort((a, b) => a.Country.localeCompare(b.Country, 'fr'));
-  select.innerHTML = '<option value="">— Sélectionner un pays —</option>' +
-    dataSorted.map(d => `<option value="${d.NOC}">${d.Country}</option>`).join('');
 
   function render(noc) {
     const country = data.find(d => d.NOC === noc);
@@ -765,10 +831,16 @@ fetch('data/per_sport_predictions.json').then(r => r.json()).then(data => {
     }, PLOTLY_CONFIG);
   }
 
-  // Init
-  select.value = 'USA';
+  // Init : combobox avec recherche (meme composant que la section precedente)
+  createCountryCombobox({
+    box: document.getElementById('evo-box'),
+    input: document.getElementById('evo-input'),
+    dropdown: document.getElementById('evo-dropdown'),
+    options: dataSorted,
+    initialNoc: 'USA',
+    onSelect: render,
+  });
   render('USA');
-  select.addEventListener('change', e => render(e.target.value));
 });
 </script>
 
