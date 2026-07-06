@@ -60,6 +60,8 @@
     <p class="text-lg text-slate-600 max-w-2xl mx-auto">
       Le modèle n'a jamais vu Paris 2024 à l'entraînement. Voici comment il s'en sort
       sur cette baseline avant la projection LA 2028.
+      Périmètre : les <strong>30 sports modélisés</strong> (les totaux peuvent donc être
+      légèrement inférieurs aux tableaux officiels complets).
     </p>
   </div>
 
@@ -183,6 +185,8 @@
     🥉 <strong style="color: #cd7f32;">Bronze</strong> empilées.
     En mode comparaison, chaque pays occupe sa propre ligne.
     L'année <strong>2028</strong> est une prédiction du modèle ; toutes les autres années sont des données réelles.
+    Le graphe détaille les <strong>15 premières disciplines</strong> du pays ; le total affiché en haut
+    couvre, lui, <strong>tous les sports</strong> (il peut donc dépasser la somme des barres).
     <br><br>
     <strong>Pourquoi des décimales en 2028 ?</strong> Le modèle est une régression : il prédit une
     <strong>espérance</strong>, pas un compte entier. Une valeur de <strong>0.3</strong> se lit
@@ -788,8 +792,10 @@ fetch('data/per_sport_predictions.json').then(r => r.json()).then(data => {
       .sort((a, b) => a.Total - b.Total);
 
     const sports = rows.map(r => r.Sport);
-    const grandTotal = rows.reduce((s, r) => s + r.Total, 0);
-    totalEl.textContent = `${country.Country} — ${yearLbl(year)} : ${grandTotal.toFixed(0)} médailles`;
+    // Total exact tous sports (la base de donnees), pas la somme des 15 disciplines affichees
+    const t = (country.totals_by_year || {})[String(year)];
+    const grandTotal = t ? t.Total : rows.reduce((s, r) => s + r.Total, 0);
+    totalEl.textContent = `${country.Country} — ${yearLbl(year)} : ${Number(grandTotal).toFixed(0)} médailles (tous sports)`;
 
     const mk = (key, color, emoji) => ({
       x: rows.map(r => r[key]), y: sports, type: 'bar', orientation: 'h',
@@ -817,13 +823,11 @@ fetch('data/per_sport_predictions.json').then(r => r.json()).then(data => {
   function renderCompare() {
     const year = state.selectedYear;
 
-    // Une ligne par pays : on somme Or/Argent/Bronze sur tous les sports de ce pays pour l'annee
+    // Une ligne par pays : totaux exacts tous sports (totals_by_year = la base de donnees)
     const rows = state.compareNocs.map(noc => {
       const c = data.find(d => d.NOC === noc);
-      const records = c ? (c.by_year[String(year)] || []) : [];
-      const gold = records.reduce((s, r) => s + r.Gold, 0);
-      const silver = records.reduce((s, r) => s + r.Silver, 0);
-      const bronze = records.reduce((s, r) => s + r.Bronze, 0);
+      const t = c ? (c.totals_by_year || {})[String(year)] : null;
+      const gold = t ? t.Gold : 0, silver = t ? t.Silver : 0, bronze = t ? t.Bronze : 0;
       return { noc, name: c ? c.Country : noc, gold, silver, bronze, total: gold + silver + bronze };
     });
 
@@ -895,17 +899,14 @@ fetch('data/per_sport_predictions.json').then(r => r.json()).then(data => {
       return;
     }
 
-    // Sommer Or/Argent/Bronze sur tous les sports, pour chaque annee
+    // Totaux exacts tous sports par annee (totals_by_year = la base de donnees)
     const series = { Gold: [], Silver: [], Bronze: [], Total: [] };
     YEARS.forEach(y => {
-      const records = country.by_year[String(y)] || [];
-      const g = records.reduce((s, r) => s + r.Gold, 0);
-      const s = records.reduce((a, r) => a + r.Silver, 0);
-      const b = records.reduce((a, r) => a + r.Bronze, 0);
-      series.Gold.push(g);
-      series.Silver.push(s);
-      series.Bronze.push(b);
-      series.Total.push(g + s + b);
+      const t = (country.totals_by_year || {})[String(y)] || { Gold: 0, Silver: 0, Bronze: 0, Total: 0 };
+      series.Gold.push(t.Gold);
+      series.Silver.push(t.Silver);
+      series.Bronze.push(t.Bronze);
+      series.Total.push(t.Total);
     });
 
     const last = series.Total[series.Total.length - 1];
